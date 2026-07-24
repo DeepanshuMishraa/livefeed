@@ -1,0 +1,21 @@
+package.json
+  s_761f31499b05c9::t_7725ae282ac2f2 64
+bun.lock
+  s_761f31499b05c9::t_94cf72aa61631c 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "6fadce16c97c28c2bf0d9f8d6af3e231136788b4",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
