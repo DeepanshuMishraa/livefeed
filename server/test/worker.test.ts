@@ -79,16 +79,24 @@ describe("livefeed auth worker", () => {
   });
 
   it("returns a clean callback error page for an invalid link", async () => {
-    const response = await app.request(
+    const callback = await app.request(
       "https://auth.livefeed.test/v1/oauth/callback?state=invalid",
+      undefined,
+      env,
+    );
+    await callback.body?.cancel();
+    expect(callback.status).toBe(303);
+    expect(callback.headers.get("location")).toBe("/v1/oauth/complete?status=error");
+
+    const response = await app.request(
+      "https://auth.livefeed.test/v1/oauth/complete?status=error",
       undefined,
       env,
     );
     const html = await response.text();
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
     expect(html).toContain("Authorization did not finish");
-    expect(html).toContain("The sign-in link is invalid or incomplete.");
     expect(html).not.toContain("gradient");
   });
 
@@ -103,8 +111,9 @@ describe("livefeed auth worker", () => {
       undefined,
       env,
     );
-    expect(callback.status).toBe(400);
-    expect(await callback.text()).toContain("Google authorization was cancelled.");
+    expect(callback.status).toBe(303);
+    expect(callback.headers.get("location")).toBe("/v1/oauth/complete?status=error");
+    await callback.body?.cancel();
 
     const exchange = await app.request(
       "https://auth.livefeed.test/v1/oauth/token",

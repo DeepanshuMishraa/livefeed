@@ -17,6 +17,15 @@ It uses Hono, PKCE, and short-lived Durable Object sessions.
 
 OAuth sessions expire after five minutes. Durable Object alarms remove abandoned sessions.
 
+Cloudflare-native rate limits protect each public boundary:
+
+- 10 new sign-in sessions per source address per minute
+- 90 polling or callback requests per OAuth session per minute
+- 30 refreshes per saved login per minute
+- 3,000 requests per route and Cloudflare location per minute as a service-wide ceiling
+
+Rate-limited responses use HTTP `429` with `Retry-After: 60`.
+
 ## Local development
 
 Create a Google Cloud **Web application** OAuth client. Add this authorized redirect URI:

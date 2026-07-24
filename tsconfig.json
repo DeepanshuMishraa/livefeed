@@ -8,6 +8,7 @@
     "jsxImportSource": "@opentui/react",
     "allowJs": false,
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,

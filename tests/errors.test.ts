@@ -14,6 +14,18 @@ describe("error messages", () => {
       "No active livestream found for Example.",
     );
   });
+
+  it("explains that broker failures do not alter saved credentials", () => {
+    expect(
+      LivefeedError.message({
+        _tag: "AuthServerFailure",
+        status: 503,
+        reason: "temporarily unavailable",
+      }),
+    ).toBe(
+      "Livefeed authentication returned 503: temporarily unavailable. No credentials were changed; retry shortly.",
+    );
+  });
 });
 
 describe("retryDelaySeconds", () => {

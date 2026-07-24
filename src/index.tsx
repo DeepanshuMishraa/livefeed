@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 import { Result } from "better-result";
+import packageJson from "../package.json" with { type: "json" };
 import { accessToken, authenticate, loadCredentials, logout } from "./auth";
 import { parseCommand } from "./cli";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import { runTui } from "./tui";
 import { findActiveBroadcast } from "./youtube";
 
-const VERSION = "0.1.0";
+const VERSION = packageJson.version;
 const HELP = `livefeed — your YouTube live chat, in the terminal
 
 Usage:

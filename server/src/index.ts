@@ -40,7 +40,24 @@ app.get("/", (context) =>
   }),
 );
 
+app.get("/v1/oauth/complete", (context) => {
+  const status = context.req.query("status");
+  if (!status) return context.html(authorizationPage("success"));
+  const detail =
+    status === "rate_limited"
+      ? "Too many authorization requests were received. Wait one minute and start sign-in again."
+      : "Authorization could not be completed. Return to your terminal and try again.";
+  return context.html(authorizationPage("error", detail));
+});
+
 app.post("/v1/oauth/sessions", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "sessions"))) {
+    return rateLimitedResponse();
+  }
+  const clientAddress = context.req.header("cf-connecting-ip") ?? "unknown";
+  if (!(await allowed(context.env.SESSION_RATE_LIMITER, `session:${clientAddress}`))) {
+    return rateLimitedResponse();
+  }
   const config = configuration(context.env);
   if (!config.ok) return context.json(config.error, 500);
   const body = await validJson(context.req.raw, createSessionSchema);
@@ -96,19 +113,19 @@ app.post("/v1/oauth/sessions", async (context) => {
 });
 
 app.get("/v1/oauth/callback", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "callback"))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
+  }
   const config = configuration(context.env);
   if (!config.ok) {
-    return context.html(
-      authorizationPage("error", "The authorization server is not configured correctly."),
-      500,
-    );
+    return context.redirect("/v1/oauth/complete?status=error", 303);
   }
   const parsedState = parseOAuthState(context.req.query("state") ?? "");
   if (!parsedState) {
-    return context.html(
-      authorizationPage("error", "The sign-in link is invalid or incomplete. Start sign-in again."),
-      400,
-    );
+    return context.redirect("/v1/oauth/complete?status=error", 303);
+  }
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `callback:${parsedState.sessionId}`))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
   }
 
   const stub = context.env.OAUTH_SESSIONS.get(
@@ -126,21 +143,21 @@ app.get("/v1/oauth/callback", async (context) => {
   });
   if (response.ok) {
     await response.body?.cancel();
-    return context.html(authorizationPage("success"));
+    return context.redirect("/v1/oauth/complete", 303);
   }
-  const detail = await readInternalError(response);
-  return context.html(
-    authorizationPage(
-      "error",
-      detail ?? "Authorization could not be completed. Return to your terminal and try again.",
-    ),
-    response.status >= 500 ? 502 : 400,
-  );
+  await response.body?.cancel();
+  return context.redirect("/v1/oauth/complete?status=error", 303);
 });
 
 app.post("/v1/oauth/token", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "token"))) {
+    return rateLimitedResponse();
+  }
   const body = await validJson(context.req.raw, exchangeSessionSchema);
   if (!body.ok) return context.json(body.error, 400);
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `poll:${body.value.sessionId}`))) {
+    return rateLimitedResponse();
+  }
   const stub = context.env.OAUTH_SESSIONS.get(
     context.env.OAUTH_SESSIONS.idFromName(body.value.sessionId),
   );
@@ -153,10 +170,17 @@ app.post("/v1/oauth/token", async (context) => {
 });
 
 app.post("/v1/oauth/refresh", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "refresh"))) {
+    return rateLimitedResponse();
+  }
   const config = configuration(context.env);
   if (!config.ok) return context.json(config.error, 500);
   const body = await validJson(context.req.raw, refreshTokenSchema);
   if (!body.ok) return context.json(body.error, 400);
+  const refreshKey = await sha256Base64Url(body.value.refreshToken);
+  if (!(await allowed(context.env.REFRESH_RATE_LIMITER, `refresh:${refreshKey}`))) {
+    return rateLimitedResponse();
+  }
 
   let response: Response;
   try {
@@ -258,17 +282,6 @@ async function validJson<TSchema extends v.BaseSchema<unknown, unknown, v.BaseIs
   }
 }
 
-async function readInternalError(response: Response): Promise<string | null> {
-  try {
-    const payload: unknown = await response.json();
-    const schema = v.object({ error: v.object({ message: v.string() }) });
-    const parsed = v.safeParse(schema, payload);
-    return parsed.success ? parsed.output.error.message : null;
-  } catch {
-    return null;
-  }
-}
-
 function apiError(
   code: string,
   message: string,
@@ -276,6 +289,21 @@ function apiError(
   readonly error: { readonly code: string; readonly message: string };
 } {
   return { error: { code, message } };
+}
+
+async function allowed(rateLimiter: RateLimit, key: string): Promise<boolean> {
+  const result = await rateLimiter.limit({ key });
+  return result.success;
+}
+
+function rateLimitedResponse(): Response {
+  return Response.json(
+    apiError("rate_limited", "Too many authentication requests. Wait one minute and try again."),
+    {
+      status: 429,
+      headers: { "retry-after": "60" },
+    },
+  );
 }
 
 export default app;

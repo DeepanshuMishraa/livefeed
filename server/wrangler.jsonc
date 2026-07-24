@@ -15,6 +15,40 @@
       }
     ]
   },
+  "ratelimits": [
+    {
+      "name": "API_RATE_LIMITER",
+      "namespace_id": "152001",
+      "simple": {
+        "limit": 3000,
+        "period": 60
+      }
+    },
+    {
+      "name": "SESSION_RATE_LIMITER",
+      "namespace_id": "152002",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    },
+    {
+      "name": "POLL_RATE_LIMITER",
+      "namespace_id": "152003",
+      "simple": {
+        "limit": 90,
+        "period": 60
+      }
+    },
+    {
+      "name": "REFRESH_RATE_LIMITER",
+      "namespace_id": "152004",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ],
   "exports": {
     "OAuthSession": {
       "type": "durable-object",

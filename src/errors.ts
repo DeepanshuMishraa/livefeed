@@ -1,7 +1,9 @@
 export type LivefeedError =
   | { readonly _tag: "Unauthenticated" }
-  | { readonly _tag: "OAuthNotConfigured" }
   | { readonly _tag: "OAuthCallbackFailed"; readonly reason: string }
+  | { readonly _tag: "AuthServerUnavailable"; readonly reason: string }
+  | { readonly _tag: "AuthServerFailure"; readonly status: number; readonly reason: string }
+  | { readonly _tag: "InvalidAuthServerResponse"; readonly operation: string }
   | { readonly _tag: "CredentialStoreUnavailable"; readonly reason: string }
   | { readonly _tag: "TokenRejected" }
   | { readonly _tag: "NoChannel" }
@@ -19,10 +21,14 @@ export const LivefeedError = {
     switch (error._tag) {
       case "Unauthenticated":
         return "Not signed in. Run `livefeed auth`, then try again.";
-      case "OAuthNotConfigured":
-        return "Google OAuth is not configured in this build. Set LIVEFEED_GOOGLE_CLIENT_ID and LIVEFEED_GOOGLE_CLIENT_SECRET, then rebuild.";
       case "OAuthCallbackFailed":
         return `Google sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed auth\` to retry.`;
+      case "AuthServerUnavailable":
+        return `Could not reach the Livefeed authentication server: ${error.reason}. No credentials were changed; check your connection and retry.`;
+      case "AuthServerFailure":
+        return `Livefeed authentication returned ${error.status}: ${error.reason}. No credentials were changed; retry shortly.`;
+      case "InvalidAuthServerResponse":
+        return `Livefeed authentication returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
       case "CredentialStoreUnavailable":
         return `The system credential store is unavailable: ${error.reason}. On Linux, start GNOME Keyring or KWallet, then retry.`;
       case "TokenRejected":

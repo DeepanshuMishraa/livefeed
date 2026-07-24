@@ -38,11 +38,7 @@ Use `↑`/`↓` or `j`/`k` to scroll, `G` to jump to the latest message, and `q`
 
 ## Development
 
-Create a Google Cloud Desktop OAuth client, enable YouTube Data API v3, and add yourself as a test user.
-
 ```sh
-export LIVEFEED_GOOGLE_CLIENT_ID="..."
-export LIVEFEED_GOOGLE_CLIENT_SECRET="..."
 bun install
 bun run src/index.tsx auth
 bun run dev
@@ -53,7 +49,19 @@ bun run check
 bun run build
 ```
 
-Authentication uses PKCE and the read-only YouTube scope. Tokens are stored in macOS Keychain or Linux Secret Service. There is no telemetry. See [PRIVACY.md](PRIVACY.md).
+Authentication uses the hosted broker in [`server/`](server/README.md), PKCE, and the read-only
+YouTube scope. The Google client secret remains in Cloudflare; it is not part of the CLI build.
+Tokens are stored in macOS Keychain or Linux Secret Service. There is no analytics or advertising.
+See [PRIVACY.md](PRIVACY.md).
+
+## Release
+
+```sh
+npm run deploy
+```
+
+The deploy script runs every check, builds the CLI, increments the patch version without creating a
+Git tag, and publishes the public npm package. For example, `0.0.1` becomes `0.0.2`.
 
 ## License
 
