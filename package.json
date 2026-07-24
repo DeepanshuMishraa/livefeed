@@ -1,0 +1,66 @@
+{
+  "name": "livefeed",
+  "version": "0.1.0",
+  "description": "YouTube live chat, native to your terminal.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeepanshuMishraa/livefeed.git"
+  },
+  "homepage": "https://github.com/DeepanshuMishraa/livefeed#readme",
+  "bugs": {
+    "url": "https://github.com/DeepanshuMishraa/livefeed/issues"
+  },
+  "type": "module",
+  "module": "src/index.tsx",
+  "bin": {
+    "livefeed": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/index.tsx",
+    "build": "bun run scripts/build.ts",
+    "generate:proto": "grpc_tools_node_protoc --proto_path=proto --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=outputServices=grpc-js,env=node,useExactTypes=true,esModuleInterop=true proto/stream_list.proto",
+    "check": "bun run generate:proto && bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.4",
+    "@opentui/core": "^0.4.5",
+    "@opentui/react": "^0.4.5",
+    "better-result": "^2.10.0",
+    "react": "^19.2.6",
+    "valibot": "^1.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
+    "@types/bun": "^1.3.14",
+    "@types/react": "^19.2.17",
+    "grpc-tools": "^1.13.1",
+    "ts-proto": "^2.12.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "keywords": [
+    "youtube",
+    "live-chat",
+    "tui",
+    "terminal",
+    "bun"
+  ],
+  "trustedDependencies": [
+    "protobufjs"
+  ]
+}
