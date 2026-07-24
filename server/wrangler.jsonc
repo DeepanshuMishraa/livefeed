@@ -12,6 +12,10 @@
       {
         "name": "OAUTH_SESSIONS",
         "class_name": "OAuthSession"
+      },
+      {
+        "name": "TWITCH_OAUTH_SESSIONS",
+        "class_name": "TwitchOAuthSession"
       }
     ]
   },
@@ -51,6 +55,10 @@
   ],
   "exports": {
     "OAuthSession": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    },
+    "TwitchOAuthSession": {
       "type": "durable-object",
       "storage": "sqlite"
     }

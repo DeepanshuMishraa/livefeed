@@ -12,12 +12,15 @@ import {
   refreshTokenSchema,
   SESSION_LIFETIME_MS,
   sha256Base64Url,
+  TWITCH_SCOPE,
+  twitchTokenSchema,
   YOUTUBE_SCOPE,
 } from "./domain";
 import { OAuthSession } from "./oauth-session";
 import { authorizationPage } from "./page";
+import { TwitchOAuthSession } from "./twitch-oauth-session";
 
-export { OAuthSession };
+export { OAuthSession, TwitchOAuthSession };
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -58,7 +61,7 @@ app.post("/v1/oauth/sessions", async (context) => {
   if (!(await allowed(context.env.SESSION_RATE_LIMITER, `session:${clientAddress}`))) {
     return rateLimitedResponse();
   }
-  const config = configuration(context.env);
+  const config = googleConfiguration(context.env);
   if (!config.ok) return context.json(config.error, 500);
   const body = await validJson(context.req.raw, createSessionSchema);
   if (!body.ok) return context.json(body.error, 400);
@@ -116,7 +119,7 @@ app.get("/v1/oauth/callback", async (context) => {
   if (!(await allowed(context.env.API_RATE_LIMITER, "callback"))) {
     return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
   }
-  const config = configuration(context.env);
+  const config = googleConfiguration(context.env);
   if (!config.ok) {
     return context.redirect("/v1/oauth/complete?status=error", 303);
   }
@@ -173,7 +176,7 @@ app.post("/v1/oauth/refresh", async (context) => {
   if (!(await allowed(context.env.API_RATE_LIMITER, "refresh"))) {
     return rateLimitedResponse();
   }
-  const config = configuration(context.env);
+  const config = googleConfiguration(context.env);
   if (!config.ok) return context.json(config.error, 500);
   const body = await validJson(context.req.raw, refreshTokenSchema);
   if (!body.ok) return context.json(body.error, 400);
@@ -227,6 +230,174 @@ app.post("/v1/oauth/refresh", async (context) => {
       );
 });
 
+app.post("/v1/oauth/twitch/sessions", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "twitch-sessions"))) {
+    return rateLimitedResponse();
+  }
+  const clientAddress = context.req.header("cf-connecting-ip") ?? "unknown";
+  if (!(await allowed(context.env.SESSION_RATE_LIMITER, `twitch-session:${clientAddress}`))) {
+    return rateLimitedResponse();
+  }
+  const config = twitchConfiguration(context.env);
+  if (!config.ok) return context.json(config.error, 500);
+  const body = await validJson(context.req.raw, createSessionSchema);
+  if (!body.ok) return context.json(body.error, 400);
+
+  const sessionId = randomBase64Url(24);
+  const browserState = randomBase64Url(32);
+  const expiresAt = Date.now() + SESSION_LIFETIME_MS;
+  const stub = context.env.TWITCH_OAUTH_SESSIONS.get(
+    context.env.TWITCH_OAUTH_SESSIONS.idFromName(sessionId),
+  );
+  const created = await stub.fetch("https://twitch-oauth-session/create", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      browserState,
+      clientCodeChallenge: body.value.codeChallenge,
+      expiresAt,
+    }),
+  });
+  if (!created.ok) {
+    await created.body?.cancel();
+    return context.json(
+      apiError("session_unavailable", "The Twitch sign-in session could not be created."),
+      503,
+    );
+  }
+  await created.body?.cancel();
+
+  const authorizeUrl = new URL("https://id.twitch.tv/oauth2/authorize");
+  authorizeUrl.search = new URLSearchParams({
+    client_id: context.env.TWITCH_CLIENT_ID,
+    redirect_uri: config.redirectUri,
+    response_type: "code",
+    scope: TWITCH_SCOPE,
+    state: `${sessionId}.${browserState}`,
+  }).toString();
+  return context.json(
+    {
+      sessionId,
+      authorizationUrl: authorizeUrl.toString(),
+      clientId: context.env.TWITCH_CLIENT_ID,
+      expiresInSeconds: SESSION_LIFETIME_MS / 1000,
+      pollIntervalSeconds: POLL_INTERVAL_SECONDS,
+    },
+    201,
+  );
+});
+
+app.get("/v1/oauth/twitch/callback", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "twitch-callback"))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
+  }
+  const config = twitchConfiguration(context.env);
+  if (!config.ok) return context.redirect("/v1/oauth/complete?status=error", 303);
+  const parsedState = parseOAuthState(context.req.query("state") ?? "");
+  if (!parsedState) return context.redirect("/v1/oauth/complete?status=error", 303);
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `twitch-callback:${parsedState.sessionId}`))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
+  }
+  const stub = context.env.TWITCH_OAUTH_SESSIONS.get(
+    context.env.TWITCH_OAUTH_SESSIONS.idFromName(parsedState.sessionId),
+  );
+  const response = await stub.fetch("https://twitch-oauth-session/callback", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      browserState: parsedState.browserState,
+      code: context.req.query("code"),
+      error: context.req.query("error"),
+      redirectUri: config.redirectUri,
+    }),
+  });
+  if (response.ok) {
+    await response.body?.cancel();
+    return context.redirect("/v1/oauth/complete", 303);
+  }
+  await response.body?.cancel();
+  return context.redirect("/v1/oauth/complete?status=error", 303);
+});
+
+app.post("/v1/oauth/twitch/token", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "twitch-token"))) {
+    return rateLimitedResponse();
+  }
+  const body = await validJson(context.req.raw, exchangeSessionSchema);
+  if (!body.ok) return context.json(body.error, 400);
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `twitch-poll:${body.value.sessionId}`))) {
+    return rateLimitedResponse();
+  }
+  const stub = context.env.TWITCH_OAUTH_SESSIONS.get(
+    context.env.TWITCH_OAUTH_SESSIONS.idFromName(body.value.sessionId),
+  );
+  const response = await stub.fetch("https://twitch-oauth-session/exchange", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ codeVerifier: body.value.codeVerifier }),
+  });
+  return new Response(response.body, response);
+});
+
+app.post("/v1/oauth/twitch/refresh", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "twitch-refresh"))) {
+    return rateLimitedResponse();
+  }
+  const config = twitchConfiguration(context.env);
+  if (!config.ok) return context.json(config.error, 500);
+  const body = await validJson(context.req.raw, refreshTokenSchema);
+  if (!body.ok) return context.json(body.error, 400);
+  const refreshKey = await sha256Base64Url(body.value.refreshToken);
+  if (!(await allowed(context.env.REFRESH_RATE_LIMITER, `twitch-refresh:${refreshKey}`))) {
+    return rateLimitedResponse();
+  }
+
+  let response: Response;
+  try {
+    response = await fetch("https://id.twitch.tv/oauth2/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: context.env.TWITCH_CLIENT_ID,
+        client_secret: context.env.TWITCH_CLIENT_SECRET,
+        refresh_token: body.value.refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+  } catch {
+    return context.json(
+      apiError("twitch_unavailable", "Twitch could not be reached. Retry shortly."),
+      502,
+    );
+  }
+  if (response.status === 400 || response.status === 401) {
+    await response.body?.cancel();
+    return context.json(
+      apiError("token_rejected", "Twitch rejected the saved login. Sign in again."),
+      401,
+    );
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    return context.json(
+      apiError("twitch_unavailable", "Twitch could not refresh the login. Retry shortly."),
+      502,
+    );
+  }
+  const payload: unknown = await response.json();
+  const parsed = v.safeParse(twitchTokenSchema, payload);
+  return parsed.success
+    ? context.json({
+        accessToken: parsed.output.access_token,
+        refreshToken: parsed.output.refresh_token,
+        expiresIn: parsed.output.expires_in,
+      })
+    : context.json(
+        apiError("invalid_twitch_response", "Twitch returned an unexpected token response."),
+        502,
+      );
+});
+
 app.notFound((context) =>
   context.json(apiError("not_found", "The requested endpoint does not exist."), 404),
 );
@@ -241,7 +412,7 @@ app.onError((_error, context) =>
   ),
 );
 
-function configuration(
+function googleConfiguration(
   env: Bindings,
 ):
   | { readonly ok: true; readonly redirectUri: string }
@@ -254,6 +425,26 @@ function configuration(
         error: apiError(
           "server_misconfigured",
           "The authorization server is missing a valid origin or Google OAuth credentials.",
+        ),
+      };
+}
+
+function twitchConfiguration(
+  env: Bindings,
+):
+  | { readonly ok: true; readonly redirectUri: string }
+  | { readonly ok: false; readonly error: ReturnType<typeof apiError> } {
+  const origin = parsePublicOrigin(env.PUBLIC_ORIGIN);
+  return origin && env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET
+    ? {
+        ok: true,
+        redirectUri: new URL("/v1/oauth/twitch/callback", origin).toString(),
+      }
+    : {
+        ok: false,
+        error: apiError(
+          "server_misconfigured",
+          "The authorization server is missing a valid origin or Twitch OAuth credentials.",
         ),
       };
 }

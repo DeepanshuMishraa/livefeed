@@ -9,6 +9,7 @@ import * as v from "valibot";
 import type { Broadcast, ChatEvent as ChatEventType } from "./domain";
 import { ChatEvent } from "./domain";
 import type { LivefeedError } from "./errors";
+import type { ChatConnection, ChatHistory, ChatStreamCallbacks } from "./feed";
 import {
   LiveChatMessageType,
   type LiveChatMessageListResponse,
@@ -109,11 +110,6 @@ export async function findActiveBroadcast(
   });
 }
 
-export type ChatHistory = {
-  readonly events: readonly ChatEventType[];
-  readonly nextPageToken: string;
-};
-
 export async function loadChatHistory(
   accessToken: string,
   liveChatId: string,
@@ -167,16 +163,6 @@ export async function loadChatHistory(
     .filter((event): event is ChatEventType => event !== null);
   return Result.ok({ events, nextPageToken: parsed.output.nextPageToken });
 }
-
-export type ChatStreamCallbacks = {
-  readonly onMessages: (messages: readonly ChatEventType[]) => void;
-  readonly onResponse: (pageToken: string) => void;
-  readonly onClose: () => void;
-  readonly onEnd: () => void;
-  readonly onError: (error: LivefeedError) => void;
-};
-
-export type ChatConnection = { readonly cancel: () => void };
 
 export function openChatStream(
   accessToken: string,

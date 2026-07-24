@@ -1,19 +1,22 @@
 # livefeed auth server
 
-Cloudflare Worker that keeps Livefeed's Google OAuth client secret out of the distributed CLI.
+Cloudflare Worker that keeps Livefeed's Google and Twitch OAuth client secrets out of the
+distributed CLI.
 It uses Hono, PKCE, and short-lived Durable Object sessions.
 
 ## OAuth flow
 
 1. The CLI creates a local PKCE verifier and sends only its challenge to
-   `POST /v1/oauth/sessions`.
-2. The Worker returns a Google authorization URL. The CLI opens it and polls
-   `POST /v1/oauth/token`.
-3. Google returns to `/v1/oauth/callback`. The Worker exchanges the Google code and shows a
+   `POST /v1/oauth/sessions` for Google or `POST /v1/oauth/twitch/sessions` for Twitch.
+2. The Worker returns the provider authorization URL. The CLI opens it and polls the matching
+   token endpoint.
+3. Google returns to `/v1/oauth/callback`, or Twitch returns to
+   `/v1/oauth/twitch/callback`. The Worker exchanges the provider code and shows a
    minimal success page.
 4. The matching CLI receives the tokens once. The session is then deleted.
-5. Access-token refreshes go through `POST /v1/oauth/refresh`, so the Google client secret never
-   ships in the npm or Homebrew package.
+5. Access-token refreshes go through `POST /v1/oauth/refresh` for YouTube or
+   `POST /v1/oauth/twitch/refresh` for Twitch, so client secrets never ship in the npm or Homebrew
+   package.
 
 OAuth sessions expire after five minutes. Durable Object alarms remove abandoned sessions.
 
@@ -34,12 +37,18 @@ Create a Google Cloud **Web application** OAuth client. Add this authorized redi
 http://127.0.0.1:8787/v1/oauth/callback
 ```
 
+Create a Twitch **Confidential** application and add:
+
+```text
+http://127.0.0.1:8787/v1/oauth/twitch/callback
+```
+
 Then:
 
 ```sh
 cd server
 cp .dev.vars.example .dev.vars
-# Fill in GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.
+# Fill in both providers' client IDs and client secrets.
 bun install
 bun run dev
 ```
@@ -55,6 +64,8 @@ cd server
 bunx wrangler login
 bunx wrangler secret put GOOGLE_CLIENT_ID
 bunx wrangler secret put GOOGLE_CLIENT_SECRET
+bunx wrangler secret put TWITCH_CLIENT_ID
+bunx wrangler secret put TWITCH_CLIENT_SECRET
 bunx wrangler secret put PUBLIC_ORIGIN
 bun run deploy
 ```
@@ -64,6 +75,12 @@ Set `PUBLIC_ORIGIN` to the HTTPS origin only, without a path or trailing slash, 
 
 ```text
 https://auth.livefeed.example/v1/oauth/callback
+```
+
+Add this exact Twitch redirect URI:
+
+```text
+https://auth.livefeed.example/v1/oauth/twitch/callback
 ```
 
 Do not commit `.dev.vars`. Production secrets belong in Cloudflare.

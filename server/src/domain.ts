@@ -3,6 +3,7 @@ import * as v from "valibot";
 export const SESSION_LIFETIME_MS = 5 * 60 * 1000;
 export const POLL_INTERVAL_SECONDS = 2;
 export const YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
+export const TWITCH_SCOPE = "user:read:chat";
 
 const base64UrlSchema = v.pipe(v.string(), v.regex(/^[A-Za-z0-9_-]+$/));
 
@@ -61,6 +62,12 @@ export const googleTokenSchema = v.object({
   access_token: v.string(),
   expires_in: v.number(),
   refresh_token: v.optional(v.string()),
+});
+
+export const twitchTokenSchema = v.object({
+  access_token: v.string(),
+  expires_in: v.number(),
+  refresh_token: v.string(),
 });
 
 export function randomBase64Url(size: number): string {

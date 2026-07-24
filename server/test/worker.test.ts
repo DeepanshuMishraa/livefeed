@@ -54,6 +54,34 @@ describe("livefeed auth worker", () => {
     expect(authorizationUrl.searchParams.get("code_challenge_method")).toBe("S256");
   });
 
+  it("creates a short-lived Twitch authorization session", async () => {
+    const response = await app.request(
+      "https://auth.livefeed.test/v1/oauth/twitch/sessions",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ codeChallenge: validChallenge }),
+      },
+      env,
+    );
+    const payload: unknown = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(payload).toMatchObject({
+      clientId: "test-twitch-client",
+      expiresInSeconds: 300,
+      pollIntervalSeconds: 2,
+    });
+    if (!isSessionResponse(payload)) throw new Error("Expected an OAuth session response.");
+    const authorizationUrl = new URL(payload.authorizationUrl);
+    expect(authorizationUrl.origin).toBe("https://id.twitch.tv");
+    expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+      "https://auth.livefeed.test/v1/oauth/twitch/callback",
+    );
+    expect(authorizationUrl.searchParams.get("scope")).toBe("user:read:chat");
+    expect(authorizationUrl.searchParams.get("state")).toContain(payload.sessionId);
+  });
+
   it("keeps token exchange pending until the browser callback finishes", async () => {
     const session = await sessionPayload();
     const response = await app.request(

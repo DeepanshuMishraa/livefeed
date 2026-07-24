@@ -14,7 +14,12 @@ export type LivefeedError =
   | { readonly _tag: "QuotaExceeded" }
   | { readonly _tag: "NetworkUnavailable"; readonly reason: string }
   | { readonly _tag: "GoogleServiceFailure"; readonly status: number; readonly reason: string }
-  | { readonly _tag: "InvalidGoogleResponse"; readonly operation: string };
+  | { readonly _tag: "InvalidGoogleResponse"; readonly operation: string }
+  | { readonly _tag: "TwitchUnauthenticated" }
+  | { readonly _tag: "TwitchOAuthCallbackFailed"; readonly reason: string }
+  | { readonly _tag: "TwitchTokenRejected" }
+  | { readonly _tag: "TwitchServiceFailure"; readonly status: number; readonly reason: string }
+  | { readonly _tag: "InvalidTwitchResponse"; readonly operation: string };
 
 export const LivefeedError = {
   message(error: LivefeedError): string {
@@ -51,6 +56,16 @@ export const LivefeedError = {
         return `YouTube returned ${error.status}: ${error.reason}. Existing messages are preserved; retry shortly.`;
       case "InvalidGoogleResponse":
         return `YouTube returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
+      case "TwitchUnauthenticated":
+        return "Not signed in to Twitch. Run `livefeed twitch auth`, then try again.";
+      case "TwitchOAuthCallbackFailed":
+        return `Twitch sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed twitch auth\` to retry.`;
+      case "TwitchTokenRejected":
+        return "Twitch rejected the saved login. Run `livefeed twitch auth` to reconnect your account.";
+      case "TwitchServiceFailure":
+        return `Twitch returned ${error.status}: ${error.reason}. Existing messages are preserved; retry shortly.`;
+      case "InvalidTwitchResponse":
+        return `Twitch returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
     }
   },
 } as const;

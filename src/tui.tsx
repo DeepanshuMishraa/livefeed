@@ -7,18 +7,12 @@ import {
 import { createRoot, useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/react";
 import { Result } from "better-result";
 import { type RefObject, useEffect, useRef, useState } from "react";
-import { accessToken as refreshAccessToken, type Credentials } from "./auth";
 import type { Broadcast, ChatEvent, ConnectionState } from "./domain";
 import { appendBounded, stableAuthorColor } from "./domain";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
+import type { ChatConnection, FeedClient } from "./feed";
 import { ChatLayoutPolicy } from "./tui-layout";
-import {
-  findActiveBroadcast,
-  type ChatConnection,
-  loadChatHistory,
-  openChatStream,
-  retryDelaySeconds,
-} from "./youtube";
+import { retryDelaySeconds } from "./youtube";
 
 const DISCOVERY_INTERVAL_MS = 10_000;
 const ENDED_STATUS_MS = 3_000;
@@ -47,11 +41,11 @@ type Palette = (typeof palettes)[ThemeMode];
 function App({
   initialBroadcast,
   initialAccessToken,
-  credentials,
+  feed,
 }: {
   readonly initialBroadcast: Broadcast | null;
   readonly initialAccessToken: string;
-  readonly credentials: Credentials;
+  readonly feed: FeedClient;
 }) {
   const renderer = useRenderer();
   const dimensions = useTerminalDimensions();
@@ -92,9 +86,9 @@ function App({
     };
 
     const retryAfter = (error: LivefeedErrorType, operation: () => void | Promise<void>): void => {
-      if (error._tag === "TokenRejected" && !refreshing) {
+      if ((error._tag === "TokenRejected" || error._tag === "TwitchTokenRejected") && !refreshing) {
         refreshing = true;
-        void refreshAccessToken(credentials).then((result) => {
+        void feed.refreshAccessToken().then((result) => {
           refreshing = false;
           if (cancelled) return;
           if (Result.isError(result)) {
@@ -107,7 +101,11 @@ function App({
         });
         return;
       }
-      if (error._tag === "NetworkUnavailable" || error._tag === "GoogleServiceFailure") {
+      if (
+        error._tag === "NetworkUnavailable" ||
+        error._tag === "GoogleServiceFailure" ||
+        error._tag === "TwitchServiceFailure"
+      ) {
         const delay = retryDelaySeconds(attempt);
         attempt += 1;
         setState({ _tag: "reconnecting", attempt, retryInSeconds: delay });
@@ -127,7 +125,7 @@ function App({
 
     if (!broadcast) {
       const discover = async (): Promise<void> => {
-        const result = await findActiveBroadcast(accessTokenRef.current);
+        const result = await feed.findActiveBroadcast(accessTokenRef.current);
         if (cancelled) return;
         if (Result.isError(result)) {
           if (result.error._tag === "NoActiveBroadcast") {
@@ -154,7 +152,7 @@ function App({
       const connect = (): void => {
         if (cancelled) return;
         streamRef.current?.cancel();
-        streamRef.current = openChatStream(
+        streamRef.current = feed.openChatStream(
           accessTokenRef.current,
           broadcast.liveChatId,
           pageToken,
@@ -189,7 +187,7 @@ function App({
 
       const loadHistoryAndConnect = async (): Promise<void> => {
         setState({ _tag: "connecting" });
-        const history = await loadChatHistory(accessTokenRef.current, broadcast.liveChatId);
+        const history = await feed.loadChatHistory(accessTokenRef.current, broadcast.liveChatId);
         if (cancelled) return;
         if (Result.isError(history)) {
           retryAfter(history.error, loadHistoryAndConnect);
@@ -209,7 +207,7 @@ function App({
       streamRef.current = null;
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [broadcast, credentials]);
+  }, [broadcast, feed]);
 
   useKeyboard((key) => {
     if (key.name === "q") renderer.destroy();
@@ -229,7 +227,7 @@ function App({
     <ChatLayout
       width={dimensions.width}
       height={dimensions.height}
-      title={broadcast?.title ?? credentials.channelTitle}
+      title={broadcast?.title ?? feed.channelTitle}
       events={events}
       state={state}
       following={following}
@@ -373,7 +371,7 @@ function MessageRow({
 
 export async function runTui(
   initialAccessToken: string,
-  credentials: Credentials,
+  feed: FeedClient,
   initialBroadcast: Broadcast | null = null,
 ): Promise<void> {
   const renderer = await createCliRenderer({
@@ -383,10 +381,6 @@ export async function runTui(
     backgroundColor: "transparent",
   });
   createRoot(renderer).render(
-    <App
-      initialBroadcast={initialBroadcast}
-      initialAccessToken={initialAccessToken}
-      credentials={credentials}
-    />,
+    <App initialBroadcast={initialBroadcast} initialAccessToken={initialAccessToken} feed={feed} />,
   );
 }

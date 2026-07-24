@@ -1,7 +1,7 @@
 {
   "name": "livefeed",
-  "version": "0.0.3",
-  "description": "YouTube live chat, native to your terminal.",
+  "version": "0.0.6",
+  "description": "YouTube and Twitch live chat, native to your terminal.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -57,6 +57,7 @@
   },
   "keywords": [
     "youtube",
+    "twitch",
     "live-chat",
     "tui",
     "terminal",
