@@ -28,17 +28,23 @@ export const ChatLayoutPolicy = {
     const status =
       state._tag === "live"
         ? { label: "connected", short: "LIVE", tone: "connected" as const }
-        : state._tag === "connecting"
-          ? { label: "connecting…", short: "WAIT", tone: "muted" as const }
-          : state._tag === "reconnecting"
-            ? {
-                label: `reconnecting in ${state.retryInSeconds}s…`,
-                short: "RETRY",
-                tone: "warning" as const,
-              }
-            : state._tag === "ended"
-              ? { label: "stream ended", short: "ENDED", tone: "muted" as const }
-              : { label: state.message, short: "ERROR", tone: "live" as const };
+        : state._tag === "waiting"
+          ? {
+              label: "not connected · livestream offline",
+              short: "OFFLINE",
+              tone: "muted" as const,
+            }
+          : state._tag === "connecting"
+            ? { label: "connecting…", short: "WAIT", tone: "muted" as const }
+            : state._tag === "reconnecting"
+              ? {
+                  label: `reconnecting in ${state.retryInSeconds}s…`,
+                  short: "RETRY",
+                  tone: "warning" as const,
+                }
+              : state._tag === "ended"
+                ? { label: "stream ended", short: "ENDED", tone: "muted" as const }
+                : { label: state.message, short: "ERROR", tone: "live" as const };
     const reading = !following && unread > 0 ? ` · ${unread} new · G latest` : "";
     const text =
       width < 14

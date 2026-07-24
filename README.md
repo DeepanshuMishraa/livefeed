@@ -28,6 +28,11 @@ livefeed
 
 Authentication opens in your browser. No stream key or pasted token is required.
 
+You can start `livefeed` before going live. It stays open, reports that the stream is offline, and
+connects automatically within about ten seconds of the broadcast starting. When joining an active
+stream, it loads YouTube's available chat history—up to the latest 2,000 messages—before following
+new messages in real time.
+
 | Command | Action |
 | --- | --- |
 | `livefeed` | Open the newest active broadcast's chat |

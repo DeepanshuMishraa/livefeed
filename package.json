@@ -1,6 +1,6 @@
 {
   "name": "livefeed",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "YouTube live chat, native to your terminal.",
   "license": "MIT",
   "repository": {

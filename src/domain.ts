@@ -29,6 +29,7 @@ export type Broadcast = {
 };
 
 export type ConnectionState =
+  | { readonly _tag: "waiting" }
   | { readonly _tag: "connecting" }
   | { readonly _tag: "live" }
   | { readonly _tag: "reconnecting"; readonly attempt: number; readonly retryInSeconds: number }
@@ -109,7 +110,7 @@ export function stableAuthorColor(
 export function appendBounded(
   current: readonly ChatEvent[],
   incoming: readonly ChatEvent[],
-  limit = 1000,
+  limit = 2000,
 ): readonly ChatEvent[] {
   const seen = new Set(current.map((event) => event.id));
   const unique = incoming.filter((event) => {

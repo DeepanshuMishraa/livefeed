@@ -6,13 +6,22 @@ import {
 } from "@opentui/core";
 import { createRoot, useKeyboard, useRenderer, useTerminalDimensions } from "@opentui/react";
 import { Result } from "better-result";
-import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { accessToken as refreshAccessToken, type Credentials } from "./auth";
 import type { Broadcast, ChatEvent, ConnectionState } from "./domain";
 import { appendBounded, stableAuthorColor } from "./domain";
-import { LivefeedError } from "./errors";
+import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import { ChatLayoutPolicy } from "./tui-layout";
-import { type ChatConnection, openChatStream, retryDelaySeconds } from "./youtube";
+import {
+  findActiveBroadcast,
+  type ChatConnection,
+  loadChatHistory,
+  openChatStream,
+  retryDelaySeconds,
+} from "./youtube";
+
+const DISCOVERY_INTERVAL_MS = 10_000;
+const ENDED_STATUS_MS = 3_000;
 
 const palettes = {
   dark: {
@@ -36,11 +45,11 @@ const palettes = {
 type Palette = (typeof palettes)[ThemeMode];
 
 function App({
-  broadcast,
+  initialBroadcast,
   initialAccessToken,
   credentials,
 }: {
-  readonly broadcast: Broadcast;
+  readonly initialBroadcast: Broadcast | null;
   readonly initialAccessToken: string;
   readonly credentials: Credentials;
 }) {
@@ -49,14 +58,13 @@ function App({
   const [theme, setTheme] = useState<ThemeMode>(renderer.themeMode ?? "dark");
   const scrollRef = useRef<ScrollBoxRenderable>(null);
   const streamRef = useRef<ChatConnection | null>(null);
-  const tokenRef = useRef("");
   const accessTokenRef = useRef(initialAccessToken);
-  const attemptRef = useRef(0);
-  const refreshingRef = useRef(false);
-  const retryTimerRef = useRef<Timer | null>(null);
   const followingRef = useRef(true);
+  const [broadcast, setBroadcast] = useState<Broadcast | null>(initialBroadcast);
   const [events, setEvents] = useState<readonly ChatEvent[]>([]);
-  const [state, setState] = useState<ConnectionState>({ _tag: "connecting" });
+  const [state, setState] = useState<ConnectionState>(
+    initialBroadcast ? { _tag: "connecting" } : { _tag: "waiting" },
+  );
   const [following, setFollowing] = useState(true);
   const [unread, setUnread] = useState(0);
   const noColor = process.env["NO_COLOR"] !== undefined;
@@ -69,74 +77,139 @@ function App({
     };
   }, [renderer]);
 
-  const connect = useCallback(() => {
-    if (retryTimerRef.current) {
-      clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = null;
-    }
-    streamRef.current?.cancel();
-    streamRef.current = openChatStream(
-      accessTokenRef.current,
-      broadcast.liveChatId,
-      tokenRef.current,
-      {
-        onMessages(messages) {
-          setEvents((current) => appendBounded(current, messages));
-          if (!followingRef.current) setUnread((current) => current + messages.length);
-          attemptRef.current = 0;
-          setState({ _tag: "live" });
-        },
-        onResponse(pageToken) {
-          tokenRef.current = pageToken;
-          attemptRef.current = 0;
-          setState({ _tag: "live" });
-        },
-        onClose() {
-          const delayMilliseconds = tokenRef.current ? 0 : 1000;
-          retryTimerRef.current = setTimeout(connect, delayMilliseconds);
-        },
-        onEnd() {
-          if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-          setState({ _tag: "ended" });
-        },
-        onError(error) {
-          if (error._tag === "TokenRejected" && !refreshingRef.current) {
-            refreshingRef.current = true;
-            void refreshAccessToken(credentials).then((result) => {
-              refreshingRef.current = false;
-              if (Result.isError(result)) {
-                setState({ _tag: "fatal", message: LivefeedError.message(result.error) });
-                return;
-              }
-              accessTokenRef.current = result.value;
-              connect();
-            });
-            return;
-          }
-          if (error._tag === "NetworkUnavailable" || error._tag === "GoogleServiceFailure") {
-            const attempt = attemptRef.current++;
-            const delay = retryDelaySeconds(attempt);
-            setState({ _tag: "reconnecting", attempt: attempt + 1, retryInSeconds: delay });
-            retryTimerRef.current = setTimeout(connect, delay * 1000);
-            return;
-          }
-          setState(
-            error._tag === "ChatEnded"
-              ? { _tag: "ended" }
-              : { _tag: "fatal", message: LivefeedError.message(error) },
-          );
-        },
-      },
-    );
-  }, [broadcast.liveChatId, credentials]);
-
   useEffect(() => {
-    connect();
-    return () => {
-      streamRef.current?.cancel();
-      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    let cancelled = false;
+    let retryTimer: Timer | null = null;
+    let attempt = 0;
+    let refreshing = false;
+    let pageToken = "";
+
+    const schedule = (operation: () => void | Promise<void>, delayMilliseconds: number) => {
+      if (retryTimer) clearTimeout(retryTimer);
+      retryTimer = setTimeout(() => {
+        void operation();
+      }, delayMilliseconds);
     };
-  }, [connect]);
+
+    const retryAfter = (error: LivefeedErrorType, operation: () => void | Promise<void>): void => {
+      if (error._tag === "TokenRejected" && !refreshing) {
+        refreshing = true;
+        void refreshAccessToken(credentials).then((result) => {
+          refreshing = false;
+          if (cancelled) return;
+          if (Result.isError(result)) {
+            setState({ _tag: "fatal", message: LivefeedError.message(result.error) });
+            return;
+          }
+          accessTokenRef.current = result.value;
+          attempt = 0;
+          void operation();
+        });
+        return;
+      }
+      if (error._tag === "NetworkUnavailable" || error._tag === "GoogleServiceFailure") {
+        const delay = retryDelaySeconds(attempt);
+        attempt += 1;
+        setState({ _tag: "reconnecting", attempt, retryInSeconds: delay });
+        schedule(operation, delay * 1000);
+        return;
+      }
+      if (error._tag === "ChatEnded") {
+        setState({ _tag: "ended" });
+        schedule(() => {
+          setEvents([]);
+          setBroadcast(null);
+        }, ENDED_STATUS_MS);
+        return;
+      }
+      setState({ _tag: "fatal", message: LivefeedError.message(error) });
+    };
+
+    if (!broadcast) {
+      const discover = async (): Promise<void> => {
+        const result = await findActiveBroadcast(accessTokenRef.current);
+        if (cancelled) return;
+        if (Result.isError(result)) {
+          if (result.error._tag === "NoActiveBroadcast") {
+            attempt = 0;
+            setState({ _tag: "waiting" });
+            schedule(discover, DISCOVERY_INTERVAL_MS);
+            return;
+          }
+          retryAfter(result.error, discover);
+          return;
+        }
+        attempt = 0;
+        followingRef.current = true;
+        setFollowing(true);
+        setUnread(0);
+        setEvents([]);
+        setState({ _tag: "connecting" });
+        setBroadcast(result.value);
+      };
+
+      setState({ _tag: "waiting" });
+      void discover();
+    } else {
+      const connect = (): void => {
+        if (cancelled) return;
+        streamRef.current?.cancel();
+        streamRef.current = openChatStream(
+          accessTokenRef.current,
+          broadcast.liveChatId,
+          pageToken,
+          {
+            onMessages(messages) {
+              setEvents((current) => appendBounded(current, messages));
+              if (!followingRef.current) setUnread((current) => current + messages.length);
+              attempt = 0;
+              setState({ _tag: "live" });
+            },
+            onResponse(nextPageToken) {
+              pageToken = nextPageToken;
+              attempt = 0;
+              setState({ _tag: "live" });
+            },
+            onClose() {
+              schedule(connect, pageToken ? 0 : 1000);
+            },
+            onEnd() {
+              setState({ _tag: "ended" });
+              schedule(() => {
+                setEvents([]);
+                setBroadcast(null);
+              }, ENDED_STATUS_MS);
+            },
+            onError(error) {
+              retryAfter(error, connect);
+            },
+          },
+        );
+      };
+
+      const loadHistoryAndConnect = async (): Promise<void> => {
+        setState({ _tag: "connecting" });
+        const history = await loadChatHistory(accessTokenRef.current, broadcast.liveChatId);
+        if (cancelled) return;
+        if (Result.isError(history)) {
+          retryAfter(history.error, loadHistoryAndConnect);
+          return;
+        }
+        pageToken = history.value.nextPageToken;
+        setEvents(history.value.events);
+        connect();
+      };
+
+      void loadHistoryAndConnect();
+    }
+
+    return () => {
+      cancelled = true;
+      streamRef.current?.cancel();
+      streamRef.current = null;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+  }, [broadcast, credentials]);
 
   useKeyboard((key) => {
     if (key.name === "q") renderer.destroy();
@@ -156,7 +229,7 @@ function App({
     <ChatLayout
       width={dimensions.width}
       height={dimensions.height}
-      title={broadcast.title}
+      title={broadcast?.title ?? credentials.channelTitle}
       events={events}
       state={state}
       following={following}
@@ -223,7 +296,11 @@ export function ChatLayout({
       >
         {events.length === 0 ? (
           <text width="100%" fg={palette.muted}>
-            Waiting for chat…
+            {state._tag === "waiting"
+              ? "No active livestream. Watching for one…"
+              : state._tag === "ended"
+                ? "Livestream ended. Watching for the next one…"
+                : "Waiting for chat…"}
           </text>
         ) : (
           events.map((event) => (
@@ -291,9 +368,9 @@ function MessageRow({
 }
 
 export async function runTui(
-  broadcast: Broadcast,
   initialAccessToken: string,
   credentials: Credentials,
+  initialBroadcast: Broadcast | null = null,
 ): Promise<void> {
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,
@@ -302,6 +379,10 @@ export async function runTui(
     backgroundColor: "transparent",
   });
   createRoot(renderer).render(
-    <App broadcast={broadcast} initialAccessToken={initialAccessToken} credentials={credentials} />,
+    <App
+      initialBroadcast={initialBroadcast}
+      initialAccessToken={initialAccessToken}
+      credentials={credentials}
+    />,
   );
 }

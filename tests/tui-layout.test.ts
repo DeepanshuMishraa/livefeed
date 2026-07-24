@@ -33,4 +33,16 @@ describe("ChatLayoutPolicy", () => {
       }).text,
     ).toBe("● connected · 3 new · G latest");
   });
+
+  it("clearly identifies an offline stream while the CLI keeps watching", () => {
+    expect(
+      ChatLayoutPolicy.status({
+        width: 80,
+        title: "Example channel",
+        state: { _tag: "waiting" },
+        following: true,
+        unread: 0,
+      }).text,
+    ).toBe("● not connected · livestream offline · Example channel · q quit");
+  });
 });

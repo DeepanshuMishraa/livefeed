@@ -5,7 +5,6 @@ import { accessToken, authenticate, loadCredentials, logout } from "./auth";
 import { parseCommand } from "./cli";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import { runTui } from "./tui";
-import { findActiveBroadcast } from "./youtube";
 
 const VERSION = packageJson.version;
 const HELP = `livefeed — your YouTube live chat, in the terminal
@@ -58,18 +57,7 @@ switch (command) {
       printError(token.error);
       break;
     }
-    process.stdout.write("Finding your active livestream…\r");
-    const broadcast = await findActiveBroadcast(token.value);
-    process.stdout.write("\u001b[2K\r");
-    if (Result.isError(broadcast)) {
-      const error: LivefeedErrorType =
-        broadcast.error._tag === "NoActiveBroadcast"
-          ? { ...broadcast.error, channelTitle: credentials.value.channelTitle }
-          : broadcast.error;
-      printError(error);
-      break;
-    }
-    await runTui(broadcast.value, token.value, credentials.value);
+    await runTui(token.value, credentials.value);
     break;
   }
 }

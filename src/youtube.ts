@@ -10,9 +10,12 @@ import type { Broadcast, ChatEvent as ChatEventType } from "./domain";
 import { ChatEvent } from "./domain";
 import type { LivefeedError } from "./errors";
 import {
+  LiveChatMessageType,
   type LiveChatMessageListResponse,
   V3DataLiveChatMessageServiceClient,
 } from "./generated/stream_list";
+
+type Fetcher = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
 const broadcastsSchema = v.object({
   items: v.array(
@@ -27,8 +30,33 @@ const broadcastsSchema = v.object({
   ),
 });
 
+const historySchema = v.object({
+  nextPageToken: v.string(),
+  items: v.array(
+    v.object({
+      id: v.string(),
+      snippet: v.object({
+        type: v.string(),
+        publishedAt: v.optional(v.string()),
+        displayMessage: v.optional(v.string()),
+      }),
+      authorDetails: v.optional(
+        v.object({
+          channelId: v.optional(v.string()),
+          displayName: v.optional(v.string()),
+          isVerified: v.optional(v.boolean()),
+          isChatOwner: v.optional(v.boolean()),
+          isChatSponsor: v.optional(v.boolean()),
+          isChatModerator: v.optional(v.boolean()),
+        }),
+      ),
+    }),
+  ),
+});
+
 export async function findActiveBroadcast(
   accessToken: string,
+  fetcher: Fetcher = globalThis.fetch,
 ): Promise<ResultType<Broadcast, LivefeedError>> {
   const url = new URL("https://www.googleapis.com/youtube/v3/liveBroadcasts");
   url.search = new URLSearchParams({
@@ -39,9 +67,13 @@ export async function findActiveBroadcast(
   }).toString();
   let response: Response;
   try {
-    response = await fetch(url, { headers: { authorization: `Bearer ${accessToken}` } });
+    response = await fetcher(url, { headers: { authorization: `Bearer ${accessToken}` } });
   } catch (cause) {
     return Result.err(networkError(cause));
+  }
+  if (response.status === 401) {
+    await response.body?.cancel();
+    return Result.err({ _tag: "TokenRejected" });
   }
   if (response.status === 403) {
     const body = await response.text();
@@ -75,6 +107,65 @@ export async function findActiveBroadcast(
     actualStartTime: active.snippet.actualStartTime,
     liveChatId: active.snippet.liveChatId,
   });
+}
+
+export type ChatHistory = {
+  readonly events: readonly ChatEventType[];
+  readonly nextPageToken: string;
+};
+
+export async function loadChatHistory(
+  accessToken: string,
+  liveChatId: string,
+  fetcher: Fetcher = globalThis.fetch,
+): Promise<ResultType<ChatHistory, LivefeedError>> {
+  const url = new URL("https://www.googleapis.com/youtube/v3/liveChat/messages");
+  url.search = new URLSearchParams({
+    liveChatId,
+    part: "id,snippet,authorDetails",
+    maxResults: "2000",
+  }).toString();
+  let response: Response;
+  try {
+    response = await fetcher(url, { headers: { authorization: `Bearer ${accessToken}` } });
+  } catch (cause) {
+    return Result.err(networkError(cause));
+  }
+  if (response.status === 401) {
+    await response.body?.cancel();
+    return Result.err({ _tag: "TokenRejected" });
+  }
+  if (!response.ok) {
+    const body = await response.text();
+    if (body.includes("liveChatDisabled")) return Result.err({ _tag: "ChatDisabled" });
+    if (body.includes("liveChatEnded")) return Result.err({ _tag: "ChatEnded" });
+    if (body.includes("quotaExceeded")) return Result.err({ _tag: "QuotaExceeded" });
+    return Result.err({
+      _tag: "GoogleServiceFailure",
+      status: response.status,
+      reason: response.statusText,
+    });
+  }
+  const body: unknown = await response.json();
+  const parsed = v.safeParse(historySchema, body);
+  if (!parsed.success) {
+    return Result.err({ _tag: "InvalidGoogleResponse", operation: "chat history" });
+  }
+  const events = parsed.output.items
+    .map((message) =>
+      ChatEvent.fromMessage({
+        id: message.id,
+        snippet: {
+          type: historyMessageType(message.snippet.type),
+          publishedAt: message.snippet.publishedAt,
+          displayMessage: message.snippet.displayMessage,
+          hasDisplayContent: Boolean(message.snippet.displayMessage),
+        },
+        authorDetails: message.authorDetails,
+      }),
+    )
+    .filter((event): event is ChatEventType => event !== null);
+  return Result.ok({ events, nextPageToken: parsed.output.nextPageToken });
 }
 
 export type ChatStreamCallbacks = {
@@ -156,6 +247,41 @@ function networkError(cause: unknown): LivefeedError {
     _tag: "NetworkUnavailable",
     reason: cause instanceof Error ? cause.message : "network request failed",
   };
+}
+
+function historyMessageType(type: string): LiveChatMessageType {
+  switch (type) {
+    case "textMessageEvent":
+      return LiveChatMessageType.TEXT_MESSAGE_EVENT;
+    case "tombstone":
+      return LiveChatMessageType.TOMBSTONE;
+    case "chatEndedEvent":
+      return LiveChatMessageType.CHAT_ENDED_EVENT;
+    case "sponsorOnlyModeStartedEvent":
+      return LiveChatMessageType.SPONSOR_ONLY_MODE_STARTED_EVENT;
+    case "sponsorOnlyModeEndedEvent":
+      return LiveChatMessageType.SPONSOR_ONLY_MODE_ENDED_EVENT;
+    case "newSponsorEvent":
+      return LiveChatMessageType.NEW_SPONSOR_EVENT;
+    case "userBannedEvent":
+      return LiveChatMessageType.USER_BANNED_EVENT;
+    case "superChatEvent":
+      return LiveChatMessageType.SUPER_CHAT_EVENT;
+    case "superStickerEvent":
+      return LiveChatMessageType.SUPER_STICKER_EVENT;
+    case "memberMilestoneChatEvent":
+      return LiveChatMessageType.MEMBER_MILESTONE_CHAT_EVENT;
+    case "membershipGiftingEvent":
+      return LiveChatMessageType.MEMBERSHIP_GIFTING_EVENT;
+    case "giftMembershipReceivedEvent":
+      return LiveChatMessageType.GIFT_MEMBERSHIP_RECEIVED_EVENT;
+    case "pollEvent":
+      return LiveChatMessageType.POLL_EVENT;
+    case "giftEvent":
+      return LiveChatMessageType.GIFT_EVENT;
+    default:
+      return LiveChatMessageType.UNRECOGNIZED;
+  }
 }
 
 export function retryDelaySeconds(attempt: number): number {
