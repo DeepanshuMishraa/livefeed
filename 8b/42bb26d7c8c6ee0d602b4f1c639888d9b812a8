@@ -1,0 +1,19 @@
+src/tui.tsx
+  s_761f31499b05c9::t_d0e1be83ba0950 293-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8b42bb26d7c8c6ee0d602b4f1c639888d9b812a8",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
