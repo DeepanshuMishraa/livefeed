@@ -1,0 +1,39 @@
+src/youtube.ts
+  s_761f31499b05c9::t_f427389d2fdb87 13,18-19,33-56,59,70,74-77,112-170,252-284
+  s_761f31499b05c9::t_66000515690685 285-286
+src/tui-layout.ts
+  s_761f31499b05c9::t_dc888860a4d262 37-47
+  s_761f31499b05c9::t_f427389d2fdb87 31-36
+tests/youtube.test.ts
+  s_761f31499b05c9::t_dd93bc044d1af0 2,48-116
+src/tui.tsx
+  s_761f31499b05c9::t_c40ca72d2c55e8 13,117-124
+  s_761f31499b05c9::t_f6e371f905b458 9,15-24,48,52,63,65-67,80-93,95-101,104-116,126-136,139-191,193-204,207,209-210,212,232,299-303,373,382-386
+  s_761f31499b05c9::t_dc888860a4d262 94,125,192
+README.md
+  s_761f31499b05c9::t_bd4e94c5f31fb9 31-35
+src/index.tsx
+  s_761f31499b05c9::t_c40ca72d2c55e8 60
+src/domain.ts
+  s_761f31499b05c9::t_f427389d2fdb87 32,113
+tests/tui-layout.test.ts
+  s_761f31499b05c9::t_c40ca72d2c55e8 36-47
+package.json
+  s_761f31499b05c9::t_1b175cfbbe2644 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "066d530764fb44b8b774975348c513fae49c5174",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
