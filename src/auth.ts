@@ -21,11 +21,14 @@ const channelSchema = v.object({
 });
 
 export type Credentials = v.InferOutput<typeof credentialSchema>;
-type OAuthConfig = { readonly clientId: string };
+type OAuthConfig = { readonly clientId: string; readonly clientSecret: string };
 
 function oauthConfig(): ResultType<OAuthConfig, LivefeedError> {
   const clientId = process.env["LIVEFEED_GOOGLE_CLIENT_ID"];
-  return clientId ? Result.ok({ clientId }) : Result.err({ _tag: "OAuthNotConfigured" });
+  const clientSecret = process.env["LIVEFEED_GOOGLE_CLIENT_SECRET"];
+  return clientId && clientSecret
+    ? Result.ok({ clientId, clientSecret })
+    : Result.err({ _tag: "OAuthNotConfigured" });
 }
 
 export async function loadCredentials(): Promise<ResultType<Credentials, LivefeedError>> {
@@ -52,6 +55,7 @@ export async function accessToken(
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: config.value.clientId,
+      client_secret: config.value.clientSecret,
       refresh_token: credentials.refreshToken,
       grant_type: "refresh_token",
     }),
@@ -101,6 +105,7 @@ export async function authenticate(): Promise<ResultType<Credentials, LivefeedEr
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: config.value.clientId,
+      client_secret: config.value.clientSecret,
       code: code.value,
       code_verifier: verifier,
       redirect_uri: callback.redirectUri,

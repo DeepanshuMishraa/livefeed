@@ -25,4 +25,5 @@ jobs:
       - run: bun run build
         env:
           LIVEFEED_GOOGLE_CLIENT_ID: ${{ secrets.LIVEFEED_GOOGLE_CLIENT_ID }}
+          LIVEFEED_GOOGLE_CLIENT_SECRET: ${{ secrets.LIVEFEED_GOOGLE_CLIENT_SECRET }}
       - run: npm publish --access public --provenance

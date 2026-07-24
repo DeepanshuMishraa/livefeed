@@ -15,9 +15,9 @@ afterEach(() => {
 });
 
 describe("accessToken", () => {
-  it("refreshes a public desktop client without a client secret", async () => {
+  it("refreshes a Google Desktop client with its generated secret", async () => {
     vi.stubEnv("LIVEFEED_GOOGLE_CLIENT_ID", "desktop-client-id");
-    vi.stubEnv("LIVEFEED_GOOGLE_CLIENT_SECRET", "must-not-be-used");
+    vi.stubEnv("LIVEFEED_GOOGLE_CLIENT_SECRET", "desktop-client-secret");
     let request: RequestInit | undefined;
     vi.stubGlobal(
       "fetch",
@@ -38,7 +38,22 @@ describe("accessToken", () => {
     expect(result).toMatchObject({ value: "access-token" });
     if (!(body instanceof URLSearchParams)) throw new Error("Expected an OAuth form body.");
     expect(body.get("client_id")).toBe("desktop-client-id");
+    expect(body.get("client_secret")).toBe("desktop-client-secret");
     expect(body.get("refresh_token")).toBe("refresh-token");
-    expect(body.has("client_secret")).toBe(false);
+  });
+
+  it("rejects an incomplete Desktop OAuth configuration before making a request", async () => {
+    vi.stubEnv("LIVEFEED_GOOGLE_CLIENT_ID", "desktop-client-id");
+    vi.stubEnv("LIVEFEED_GOOGLE_CLIENT_SECRET", "");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await accessToken({
+      refreshToken: "refresh-token",
+      channelTitle: "Channel",
+    });
+
+    expect(result).toMatchObject({ error: { _tag: "OAuthNotConfigured" } });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
