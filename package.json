@@ -61,6 +61,7 @@
     "bun"
   ],
   "trustedDependencies": [
+    "grpc-tools",
     "protobufjs"
   ]
 }
