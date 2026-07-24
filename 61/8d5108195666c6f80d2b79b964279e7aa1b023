@@ -1,0 +1,29 @@
+.github/workflows/release.yml
+  s_761f31499b05c9::t_97510ce3ebab17 28
+src/auth.ts
+  s_761f31499b05c9::t_97510ce3ebab17 24,28-31,58,108
+README.md
+  s_761f31499b05c9::t_97510ce3ebab17 45
+src/errors.ts
+  s_761f31499b05c9::t_97510ce3ebab17 23
+scripts/build.ts
+  s_761f31499b05c9::t_97510ce3ebab17 12-14
+tests/auth.test.ts
+  s_761f31499b05c9::t_97510ce3ebab17 18,20,41,43-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "618d5108195666c6f80d2b79b964279e7aa1b023",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
