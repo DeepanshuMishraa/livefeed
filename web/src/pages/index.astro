@@ -1,0 +1,760 @@
+---
+import Command from "../components/Command.astro";
+import IconLink from "../components/IconLink.astro";
+import TerminalPreview from "../components/TerminalPreview.astro";
+import Layout from "../layouts/Layout.astro";
+import packageJson from "../../../package.json";
+
+const providers = [
+	{
+		index: "01",
+		name: "YouTube",
+		description: "Public, unlisted, or private. Livefeed finds the broadcast tied to your account.",
+		auth: "livefeed yt auth",
+		run: "livefeed yt",
+	},
+	{
+		index: "02",
+		name: "Twitch",
+		description: "Connect your channel once. Livefeed follows the current stream automatically.",
+		auth: "livefeed twitch auth",
+		run: "livefeed twitch",
+	},
+] as const;
+---
+
+<Layout
+	title="livefeed — YouTube and Twitch chat in your terminal"
+	description="A fast, read-only live chat feed for YouTube and Twitch, built for your terminal."
+>
+	<header class="site-header">
+		<a class="wordmark" href="/" aria-label="Livefeed home">
+			<span class="signal" aria-hidden="true"></span>
+			livefeed
+		</a>
+		<nav aria-label="Primary navigation">
+			<a href="#commands">Commands</a>
+			<a href="#how-it-works">How it works</a>
+			<IconLink
+				href="https://github.com/DeepanshuMishraa/livefeed"
+				label="GitHub"
+				icon="github"
+			/>
+		</nav>
+	</header>
+
+	<main id="main-content">
+		<section class="hero" aria-labelledby="hero-title">
+			<div class="hero-stage">
+				<div class="hero-copy" data-reveal>
+					<p class="eyebrow">Live chat, without leaving the terminal</p>
+					<h1 id="hero-title">Your stream is live.<br />So is your terminal.</h1>
+					<p class="hero-lede">
+						YouTube and Twitch chat in one quiet, responsive feed. No browser tab to babysit.
+					</p>
+
+					<div class="install-block">
+						<div class="install-meta">
+							<span>Install with Bun</span>
+							<span>v{packageJson.version}</span>
+						</div>
+						<Command command="bun add --global livefeed" label="Copy install command" large />
+						<p>Requires Bun 1.3 or newer · macOS and desktop Linux</p>
+					</div>
+				</div>
+
+				<div class="terminal-wrap" data-reveal data-reveal-delay="1">
+					<p class="specimen-label">The feed / live</p>
+					<TerminalPreview />
+				</div>
+			</div>
+
+			<div class="hero-foot">
+				<span>01 / Authenticate</span>
+				<span>02 / Go live</span>
+				<span>03 / Read chat</span>
+			</div>
+		</section>
+
+		<section class="command-guide" id="commands" aria-labelledby="commands-title">
+			<header class="section-heading" data-reveal>
+				<p class="section-index">/ Commands</p>
+				<h2 id="commands-title">Two services.<br />One mental model.</h2>
+				<p>Authenticate once, then run the provider you need. Livefeed handles discovery.</p>
+			</header>
+
+			<div class="provider-list">
+				{
+					providers.map((provider) => (
+						<article class="provider" data-reveal>
+							<div class="provider-intro">
+								<span>{provider.index}</span>
+								<div>
+									<h3>{provider.name}</h3>
+									<p>{provider.description}</p>
+								</div>
+							</div>
+							<div class="provider-commands">
+								<div>
+									<p>Connect your account</p>
+									<Command command={provider.auth} />
+								</div>
+								<div>
+									<p>Open live chat</p>
+									<Command command={provider.run} />
+								</div>
+							</div>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="workflow" id="how-it-works" aria-labelledby="workflow-title">
+			<header class="section-heading compact" data-reveal>
+				<p class="section-index">/ How it works</p>
+				<h2 id="workflow-title">Go live. We’ll catch up.</h2>
+			</header>
+			<ol data-reveal>
+				<li>
+					<span>01</span>
+					<div>
+						<h3>Sign in through your browser</h3>
+						<p>OAuth opens once. Provider secrets stay on the Livefeed authentication server.</p>
+					</div>
+				</li>
+				<li>
+					<span>02</span>
+					<div>
+						<h3>Start the feed anytime</h3>
+						<p>If you are offline, Livefeed waits. The feed connects when your stream starts.</p>
+					</div>
+				</li>
+				<li>
+					<span>03</span>
+					<div>
+						<h3>Read without the clutter</h3>
+						<p>Chat stays pinned to the latest message and adapts as your terminal resizes.</p>
+					</div>
+				</li>
+			</ol>
+		</section>
+
+		<section class="closing" aria-labelledby="closing-title" data-reveal>
+			<p class="section-index">/ Ready when you are</p>
+			<h2 id="closing-title">Less switching.<br />More streaming.</h2>
+			<Command command="bun add --global livefeed" label="Copy install command" large />
+		</section>
+	</main>
+
+	<footer>
+		<p>livefeed · MIT licensed</p>
+		<div>
+			<IconLink href="https://www.npmjs.com/package/livefeed" label="npm" icon="npm" />
+			<IconLink
+				href="https://github.com/DeepanshuMishraa/livefeed"
+				label="Source"
+				icon="github"
+			/>
+			<IconLink
+				href="https://github.com/DeepanshuMishraa/livefeed/blob/main/PRIVACY.md"
+				label="Privacy"
+				icon="privacy"
+			/>
+		</div>
+	</footer>
+
+	<script>
+		const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const revealTargets = document.querySelectorAll<HTMLElement>("[data-reveal]");
+
+		if (reducedMotion) {
+			for (const target of revealTargets) target.dataset.revealed = "true";
+		} else {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					for (const entry of entries) {
+						if (!entry.isIntersecting) continue;
+						const target = entry.target;
+						if (target instanceof HTMLElement) target.dataset.revealed = "true";
+						observer.unobserve(target);
+					}
+				},
+				{ rootMargin: "0px 0px -12% 0px", threshold: 0.08 },
+			);
+			for (const target of revealTargets) observer.observe(target);
+		}
+	</script>
+</Layout>
+
+<style>
+	.site-header,
+	main,
+	footer {
+		width: min(100%, var(--page-width));
+		margin-inline: auto;
+	}
+
+	.site-header {
+		display: flex;
+		min-height: 5.5rem;
+		align-items: center;
+		justify-content: space-between;
+		padding-inline: var(--page-gutter);
+	}
+
+	.wordmark {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.65rem;
+		font-size: 1.05rem;
+		font-weight: 650;
+		letter-spacing: -0.025em;
+		text-decoration: none;
+	}
+
+	.wordmark .signal {
+		transition: transform 220ms var(--ease-out);
+	}
+
+	.signal {
+		width: 0.55rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--accent);
+		box-shadow: 0 0 0 0.26rem var(--canvas), 0 0 0 0.33rem var(--accent);
+	}
+
+	nav {
+		display: flex;
+		align-items: center;
+		gap: clamp(1rem, 3vw, 2.25rem);
+	}
+
+	nav > a {
+		position: relative;
+		color: var(--ink-soft);
+		font-size: 0.82rem;
+		text-decoration: none;
+		transition: color 140ms var(--ease-out);
+	}
+
+	nav > a::after {
+		position: absolute;
+		right: 0;
+		bottom: -0.35rem;
+		left: 0;
+		height: 1px;
+		background: currentColor;
+		content: "";
+		transform: scaleX(0);
+		transform-origin: right;
+		transition: transform 220ms var(--ease-out);
+	}
+
+	.hero {
+		position: relative;
+		display: grid;
+		min-height: min(57rem, calc(100svh - 5.5rem));
+		align-content: end;
+		padding: clamp(1.5rem, 4vh, 3.5rem) var(--page-gutter) 2rem;
+	}
+
+	.hero-stage {
+		display: grid;
+		grid-template-columns: minmax(0, 1.2fr) minmax(19rem, 0.8fr);
+		gap: clamp(3rem, 7vw, 8rem);
+		align-items: end;
+	}
+
+	.hero-copy {
+		max-width: 47rem;
+	}
+
+	.eyebrow,
+	.section-index,
+	.install-meta,
+	.install-block > p,
+	.provider-commands > div > p {
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.eyebrow,
+	.section-index {
+		margin: 0;
+		color: var(--accent-deep);
+		font-weight: 500;
+	}
+
+	h1,
+	h2,
+	h3,
+	p {
+		margin-top: 0;
+	}
+
+	h1 {
+		max-width: 17ch;
+		margin-bottom: 2rem;
+		font-size: clamp(3.35rem, 6.2vw, 6.25rem);
+		font-stretch: 86%;
+		font-weight: 590;
+		letter-spacing: -0.02em;
+		line-height: 1.03;
+	}
+
+	.eyebrow {
+		margin-bottom: clamp(2rem, 5vw, 3.5rem);
+	}
+
+	.hero-lede {
+		max-width: 38rem;
+		margin: 0;
+		color: var(--ink-soft);
+		font-size: clamp(1rem, 1.7vw, 1.25rem);
+		line-height: 1.55;
+	}
+
+	.install-block {
+		width: min(100%, 39rem);
+		margin-top: clamp(3.5rem, 7vh, 5.5rem);
+	}
+
+	.install-meta {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 0.75rem;
+		color: var(--ink-soft);
+	}
+
+	.install-block > p {
+		margin: 0.8rem 0 0;
+		color: var(--ink-soft);
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
+	.terminal-wrap {
+		align-self: center;
+		margin-top: -3rem;
+		padding-right: 1.25rem;
+		padding-bottom: 1.25rem;
+	}
+
+	.specimen-label {
+		margin: 0 0 0.75rem;
+		color: var(--ink-soft);
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.hero-foot {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1rem;
+		margin-top: clamp(4rem, 8vh, 7rem);
+		padding-top: 1rem;
+		border-top: 1px solid var(--ink);
+		color: var(--ink-soft);
+		font-family: var(--font-mono);
+		font-size: 0.62rem;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+	}
+
+	.command-guide,
+	.workflow,
+	.closing {
+		padding: clamp(5rem, 10vw, 9rem) var(--page-gutter);
+	}
+
+	.command-guide {
+		margin-top: clamp(2rem, 5vw, 5rem);
+		background: var(--paper);
+	}
+
+	.section-heading {
+		display: grid;
+		grid-template-columns: minmax(8rem, 0.45fr) 1.35fr 0.7fr;
+		gap: clamp(1.5rem, 4vw, 4rem);
+		align-items: start;
+		margin-bottom: clamp(4rem, 9vw, 7rem);
+	}
+
+	.section-heading h2,
+	.closing h2 {
+		margin-bottom: 0;
+		font-size: clamp(2.5rem, 5.8vw, 5.5rem);
+		font-stretch: 86%;
+		font-weight: 580;
+		letter-spacing: -0.035em;
+		line-height: 0.98;
+	}
+
+	.section-heading > p:last-child {
+		max-width: 28rem;
+		margin: 0;
+		color: var(--ink-soft);
+		line-height: 1.65;
+	}
+
+	.provider {
+		position: relative;
+		display: grid;
+		grid-template-columns: 0.8fr 1.2fr;
+		gap: clamp(2rem, 6vw, 7rem);
+		padding-block: clamp(2.5rem, 5vw, 4.5rem);
+		border-top: 1px solid var(--line);
+	}
+
+	.provider::before {
+		position: absolute;
+		top: -1px;
+		left: 0;
+		width: 7rem;
+		height: 3px;
+		background: var(--accent);
+		content: "";
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 320ms var(--ease-out);
+	}
+
+	.provider:last-child {
+		border-bottom: 1px solid var(--line);
+	}
+
+	.provider-intro {
+		display: grid;
+		grid-template-columns: 2rem 1fr;
+		gap: 1rem;
+	}
+
+	.provider-intro > span,
+	.workflow li > span {
+		padding-top: 0.4rem;
+		color: var(--accent);
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+	}
+
+	.provider h3 {
+		margin-bottom: 1rem;
+		font-size: clamp(2.5rem, 4vw, 4.25rem);
+		font-stretch: 86%;
+		font-weight: 580;
+		letter-spacing: -0.035em;
+		line-height: 0.95;
+	}
+
+	.provider-intro p {
+		max-width: 26rem;
+		margin-bottom: 0;
+		color: var(--ink-soft);
+		line-height: 1.6;
+	}
+
+	.provider-commands {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.provider-commands > div > p {
+		margin-bottom: 0.6rem;
+		color: var(--ink-soft);
+	}
+
+	.section-heading.compact {
+		grid-template-columns: minmax(8rem, 0.45fr) 2.05fr;
+	}
+
+	.workflow {
+		position: relative;
+		overflow: hidden;
+		background: var(--canvas-deep);
+	}
+
+	.workflow::after {
+		position: absolute;
+		right: -0.1em;
+		bottom: -0.24em;
+		z-index: 0;
+		color: color-mix(in oklch, var(--accent) 11%, transparent);
+		content: "03";
+		font-size: clamp(14rem, 32vw, 31rem);
+		font-stretch: 75%;
+		font-weight: 700;
+		letter-spacing: -0.12em;
+		line-height: 0.75;
+		pointer-events: none;
+	}
+
+	.workflow > * {
+		position: relative;
+		z-index: 1;
+	}
+
+	.workflow ol {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.workflow li {
+		display: grid;
+		grid-template-columns: 2rem 1fr;
+		gap: 1rem;
+		min-height: 18rem;
+		align-content: space-between;
+		padding: 1.5rem 1.5rem 2rem 0;
+		border-top: 1px solid var(--ink);
+		border-right: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+	}
+
+	.workflow li:not(:first-child) {
+		padding-left: 1.5rem;
+	}
+
+	.workflow li:last-child {
+		padding-right: 0;
+		border-right: 0;
+	}
+
+	.workflow h3 {
+		margin-bottom: 0.75rem;
+		font-size: 1.15rem;
+		font-weight: 600;
+		letter-spacing: -0.025em;
+	}
+
+	.workflow li p {
+		max-width: 24rem;
+		margin-bottom: 0;
+		color: var(--ink-soft);
+		line-height: 1.6;
+	}
+
+	.closing {
+		display: grid;
+		grid-template-columns: 0.45fr 1.1fr 1fr;
+		gap: clamp(1.5rem, 4vw, 4rem);
+		align-items: end;
+		color: var(--paper);
+		background: var(--ink);
+	}
+
+	.closing .section-index {
+		color: var(--accent-light);
+	}
+
+	.closing :global(.command) {
+		margin-bottom: 0.3rem;
+	}
+
+	footer {
+		display: flex;
+		min-height: 8rem;
+		align-items: center;
+		justify-content: space-between;
+		padding-inline: var(--page-gutter);
+	}
+
+	footer p {
+		margin: 0;
+		color: var(--ink-soft);
+		font-size: 0.8rem;
+	}
+
+	footer div {
+		display: flex;
+		gap: 1.5rem;
+	}
+
+	@media (hover: hover) {
+		nav > a:hover {
+			color: var(--accent-deep);
+		}
+
+		nav > a:hover::after {
+			transform: scaleX(1);
+			transform-origin: left;
+		}
+
+		.wordmark:hover .signal {
+			transform: scale(1.18);
+		}
+
+		.provider:hover::before {
+			transform: scaleX(1);
+		}
+	}
+
+	[data-reveal] {
+		opacity: 0;
+		transform: translateY(1.5rem);
+		transition:
+			opacity 680ms var(--ease-out),
+			transform 680ms var(--ease-out);
+	}
+
+	[data-reveal-delay="1"] {
+		transition-delay: 100ms;
+	}
+
+	[data-reveal][data-revealed="true"] {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	@media (max-width: 68rem) {
+		.hero {
+			min-height: auto;
+			padding-top: clamp(2rem, 7vw, 4.5rem);
+		}
+
+		.hero-stage {
+			grid-template-columns: 1fr;
+			gap: clamp(4rem, 10vw, 6rem);
+		}
+
+		.hero-copy {
+			max-width: 48rem;
+		}
+
+		.terminal-wrap {
+			width: min(100%, 38rem);
+			margin-top: 0;
+			margin-left: auto;
+		}
+
+		.hero-foot {
+			margin-top: clamp(4rem, 10vw, 6rem);
+		}
+	}
+
+	@media (max-width: 54rem) {
+		.terminal-wrap {
+			width: min(100%, 34rem);
+		}
+
+		.section-heading,
+		.section-heading.compact {
+			grid-template-columns: 1fr;
+		}
+
+		.section-heading h2 {
+			max-width: 12ch;
+		}
+
+		.provider {
+			grid-template-columns: 1fr;
+		}
+
+		.workflow ol {
+			grid-template-columns: 1fr;
+		}
+
+		.workflow li,
+		.workflow li:not(:first-child) {
+			grid-template-columns: 2rem 1fr;
+			min-height: auto;
+			gap: 1rem;
+			padding: 2rem 0;
+			border-right: 0;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.workflow li:last-child {
+			border-bottom: 0;
+		}
+
+		.closing {
+			grid-template-columns: 1fr;
+			align-items: start;
+		}
+
+		.closing h2 {
+			max-width: 10ch;
+			margin-bottom: 2rem;
+		}
+	}
+
+	@media (max-width: 40rem) {
+		.site-header {
+			min-height: 5rem;
+		}
+
+		nav a:not(:last-child) {
+			display: none;
+		}
+
+		.hero {
+			min-height: auto;
+			padding-top: 2rem;
+		}
+
+		h1 {
+			font-size: clamp(3rem, 16vw, 5rem);
+		}
+
+		.install-block {
+			margin-top: 3rem;
+		}
+
+		.hero-foot {
+			grid-template-columns: 1fr;
+			gap: 0.45rem;
+		}
+
+		.provider-intro {
+			grid-template-columns: 1.5rem 1fr;
+		}
+
+		footer {
+			flex-direction: column;
+			align-items: flex-start;
+			justify-content: center;
+			gap: 1.25rem;
+		}
+
+		footer div {
+			flex-wrap: wrap;
+			gap: 0.25rem 1.25rem;
+		}
+	}
+
+	@media (max-width: 25rem) {
+		h1 {
+			font-size: clamp(2.4rem, 11vw, 3rem);
+		}
+
+		.eyebrow {
+			margin-bottom: 1.5rem;
+		}
+
+		.install-meta {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.35rem;
+		}
+
+		.terminal-wrap {
+			padding-right: 0.65rem;
+			padding-bottom: 0.65rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		[data-reveal] {
+			opacity: 1;
+			transform: none;
+		}
+	}
+</style>

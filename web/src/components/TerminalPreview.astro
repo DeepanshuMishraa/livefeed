@@ -1,0 +1,178 @@
+---
+const messages = [
+	{ kind: "viewer", name: "mara", message: "audio is crisp today" },
+	{ kind: "viewer", name: "niko", message: "the new layout looks so clean" },
+	{ kind: "viewer", name: "sam", message: "does this work with unlisted streams?" },
+	{ kind: "system", name: "livefeed", message: "yes — public, private, or unlisted" },
+] as const;
+---
+
+<div class="terminal-preview" aria-label="Example Livefeed chat">
+	<header>
+		<div class="status">
+			<span aria-hidden="true"></span>
+			Live · YouTube
+		</div>
+		<span>4 watching</span>
+	</header>
+
+	<div class="feed">
+		<p class="connection"><span>✓</span> connected to “Building livefeed”</p>
+		{
+			messages.map((message, index) => (
+				<p
+					class:list={["message", { system: message.kind === "system" }]}
+					style={`--message-index: ${index}`}
+				>
+					<span class="name">{message.name}</span>
+					<span class="separator">:</span>
+					{message.message}
+				</p>
+			))
+		}
+	</div>
+
+	<footer>
+		<span>livefeed yt</span>
+		<span>read only</span>
+	</footer>
+</div>
+
+<style>
+	.terminal-preview {
+		position: relative;
+		display: grid;
+		min-height: 31rem;
+		overflow: hidden;
+		grid-template-rows: auto 1fr auto;
+		color: var(--paper);
+		background: var(--ink);
+		box-shadow: 1.25rem 1.25rem 0 var(--accent);
+	}
+
+	header,
+	footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1.25rem;
+		color: color-mix(in oklch, var(--paper) 58%, var(--ink));
+		font-family: var(--font-mono);
+		font-size: 0.65rem;
+		letter-spacing: 0.055em;
+		text-transform: uppercase;
+	}
+
+	header {
+		border-bottom: 1px solid color-mix(in oklch, var(--paper) 14%, var(--ink));
+	}
+
+	footer {
+		border-top: 1px solid color-mix(in oklch, var(--paper) 14%, var(--ink));
+	}
+
+	.status {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
+		color: var(--paper);
+	}
+
+	.status span {
+		width: 0.45rem;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--accent-light);
+		box-shadow: 0 0 0 0.2rem color-mix(in oklch, var(--accent) 28%, transparent);
+		animation: signal 2.4s ease-in-out infinite;
+	}
+
+	.feed {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: clamp(1.25rem, 3vw, 2rem);
+		font-family: var(--font-mono);
+		font-size: clamp(0.72rem, 1vw, 0.82rem);
+		line-height: 1.65;
+	}
+
+	.feed p {
+		margin: 0;
+	}
+
+	.connection {
+		margin-bottom: auto !important;
+		color: color-mix(in oklch, var(--paper) 45%, var(--ink));
+		font-size: 0.68rem;
+	}
+
+	.connection span {
+		color: var(--accent-light);
+	}
+
+	.message {
+		color: color-mix(in oklch, var(--paper) 78%, var(--ink));
+		animation: message-in 560ms var(--ease-out) both;
+		animation-delay: calc(180ms + var(--message-index) * 110ms);
+	}
+
+	.name {
+		color: var(--accent-light);
+	}
+
+	.separator {
+		margin-right: 0.45em;
+		color: color-mix(in oklch, var(--paper) 32%, var(--ink));
+	}
+
+	.system {
+		color: var(--paper);
+	}
+
+	.system .name {
+		color: oklch(83% 0.12 95);
+	}
+
+	@keyframes message-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.8rem);
+		}
+	}
+
+	@keyframes signal {
+		50% {
+			opacity: 0.55;
+			transform: scale(0.82);
+		}
+	}
+
+	@media (max-width: 54rem) {
+		.terminal-preview {
+			min-height: 25rem;
+			box-shadow: 0.75rem 0.75rem 0 var(--accent);
+		}
+	}
+
+	@media (max-width: 25rem) {
+		header,
+		footer {
+			padding-inline: 1rem;
+		}
+
+		header > span:last-child {
+			display: none;
+		}
+
+		.terminal-preview {
+			min-height: 22rem;
+			box-shadow: 0.5rem 0.5rem 0 var(--accent);
+		}
+
+		.feed {
+			padding: 1rem;
+			font-size: 0.68rem;
+		}
+	}
+</style>
