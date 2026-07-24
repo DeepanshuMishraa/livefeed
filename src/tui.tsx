@@ -290,7 +290,11 @@ export function ChatLayout({
         rootOptions={{ backgroundColor: "transparent" }}
         wrapperOptions={{ backgroundColor: "transparent" }}
         viewportOptions={{ backgroundColor: "transparent" }}
-        contentOptions={{ backgroundColor: "transparent" }}
+        contentOptions={{
+          backgroundColor: "transparent",
+          minHeight: "100%",
+          justifyContent: "flex-end",
+        }}
         verticalScrollbarOptions={{ visible: false, width: 0 }}
         horizontalScrollbarOptions={{ visible: false, height: 0 }}
       >
