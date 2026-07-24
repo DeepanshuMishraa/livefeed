@@ -1,0 +1,62 @@
+server/test/worker.test.ts
+  s_761f31499b05c9::t_3cd25ed6ecd5a2 1,3,9,19-27,59-70,82,84-85,101,103-104,109-120,132-140
+  s_761f31499b05c9::t_23abd71562ffa4 2,4-8,10-18,28-58,71-81,83,86-100,102,105-108,121-131,141-163
+server/src/page.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-111
+server/biome.json
+  s_761f31499b05c9::t_23abd71562ffa4 1,4-21
+  s_761f31499b05c9::t_0df9d3c60efe68 2
+  s_761f31499b05c9::t_acdfe82420bede 3
+.gitignore
+  s_761f31499b05c9::t_23abd71562ffa4 29-32,38
+server/src/index.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-53,55-271,276-281
+  s_761f31499b05c9::t_c6b1ed754e7988 54,272-275
+bin/livefeed.js
+  s_761f31499b05c9::t_2b7510321bd801 3-8
+  s_761f31499b05c9::t_1f039590882fed 1-2,9
+server/.dev.vars.example
+  s_761f31499b05c9::t_23abd71562ffa4 1-3
+server/src/bindings.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-8
+server/wrangler.jsonc
+  s_761f31499b05c9::t_23abd71562ffa4 1-4,6-24
+  s_761f31499b05c9::t_dde4c1e21f52db 5
+server/tsconfig.json
+  s_761f31499b05c9::t_23abd71562ffa4 1-16,18-20
+  s_761f31499b05c9::t_f75ef53e70644d 17
+server/README.md
+  s_761f31499b05c9::t_23abd71562ffa4 1-68
+server/test/env.d.ts
+  s_761f31499b05c9::t_3cd25ed6ecd5a2 1-5
+server/package.json
+  s_761f31499b05c9::t_0df9d3c60efe68 18-19,22-24
+  s_761f31499b05c9::t_23abd71562ffa4 1-17,20-21,25-29
+vitest.config.ts
+  s_761f31499b05c9::t_c5ba5e7b25f48b 1-7
+server/vitest.config.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-17
+server/src/domain.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-120
+server/src/oauth-session.ts
+  s_761f31499b05c9::t_23abd71562ffa4 1-42,44-245
+  s_761f31499b05c9::t_3cd25ed6ecd5a2 43
+server/bun.lock
+  s_761f31499b05c9::t_c8fd1db005d10b 1-374
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ecaf809b2c5c27a34cde23bd2c0f57f4762d0786",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
