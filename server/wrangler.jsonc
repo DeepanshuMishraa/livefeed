@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "livefeed-auth",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-24",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "OAUTH_SESSIONS",
+        "class_name": "OAuthSession"
+      }
+    ]
+  },
+  "exports": {
+    "OAuthSession": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}

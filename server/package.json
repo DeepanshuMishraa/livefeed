@@ -1,0 +1,29 @@
+{
+  "name": "@livefeed/auth-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "hono": "^4.12.32",
+    "valibot": "^1.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.5",
+    "@cloudflare/vitest-pool-workers": "^0.18.8",
+    "@cloudflare/workers-types": "^5.20260724.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.50.0"
+  }
+}
