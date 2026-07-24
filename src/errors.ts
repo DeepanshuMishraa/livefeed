@@ -20,7 +20,7 @@ export const LivefeedError = {
       case "Unauthenticated":
         return "Not signed in. Run `livefeed auth`, then try again.";
       case "OAuthNotConfigured":
-        return "Google OAuth is not configured in this build. Set LIVEFEED_GOOGLE_CLIENT_ID and LIVEFEED_GOOGLE_CLIENT_SECRET, then rebuild.";
+        return "Google OAuth is not configured in this build. Set LIVEFEED_GOOGLE_CLIENT_ID, then rebuild.";
       case "OAuthCallbackFailed":
         return `Google sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed auth\` to retry.`;
       case "CredentialStoreUnavailable":

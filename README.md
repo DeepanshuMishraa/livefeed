@@ -42,7 +42,6 @@ Create a Google Cloud Desktop OAuth client, enable YouTube Data API v3, and add 
 
 ```sh
 export LIVEFEED_GOOGLE_CLIENT_ID="..."
-export LIVEFEED_GOOGLE_CLIENT_SECRET="..."
 bun install
 bun run src/index.tsx auth
 bun run dev
