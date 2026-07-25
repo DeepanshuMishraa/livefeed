@@ -1,0 +1,222 @@
+---
+import LegalPage from "../layouts/LegalPage.astro";
+
+const sections = [
+  { id: "overview", label: "Overview" },
+  { id: "information", label: "Information handled" },
+  { id: "use", label: "How information is used" },
+  { id: "storage", label: "Storage and retention" },
+  { id: "sharing", label: "Service providers" },
+  { id: "rights", label: "Your choices and rights" },
+  { id: "security", label: "Security" },
+  { id: "children", label: "Children" },
+  { id: "changes", label: "Changes and contact" },
+] as const;
+---
+
+<LegalPage
+	title="Privacy policy — livefeed"
+	description="How Livefeed handles OAuth credentials, channel information, and live chat data."
+	heading="Privacy policy"
+	summary="Livefeed is a read-only terminal client. It does not sell personal information, run advertising, or include application analytics."
+	effectiveDate="25 July 2026"
+	active="privacy"
+	sections={sections}
+>
+	<section id="overview">
+		<h2>Overview</h2>
+		<p>
+			This policy explains how the Livefeed open-source project (“Livefeed”, “we”, or “us”)
+			handles information when you use the Livefeed command-line application, website, and
+			authentication service.
+		</p>
+		<p>
+			Livefeed connects to Google’s YouTube APIs and Twitch APIs only after you authorize it. Its
+			purpose is limited to finding your active stream and displaying its live chat in your
+			terminal.
+		</p>
+		<p>
+			Livefeed’s YouTube features use YouTube API Services. Google explains how it processes
+			information in the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.
+		</p>
+	</section>
+
+	<section id="information">
+		<h2>Information we handle</h2>
+
+		<h3>Account and authorization information</h3>
+		<ul>
+			<li>
+				For YouTube: an OAuth access token, refresh token, and your YouTube channel title.
+			</li>
+			<li>
+				For Twitch: an OAuth access token, refresh token, Twitch client identifier, user
+				identifier, login, and display name.
+			</li>
+			<li>
+				Livefeed requests the read-only YouTube scope and Twitch’s <code>user:read:chat</code>
+				scope.
+			</li>
+		</ul>
+
+		<h3>Stream and chat information</h3>
+		<p>
+			The CLI receives active broadcast details and live chat messages from the provider you
+			connect. Chat may include display names, user identifiers, message text, timestamps, and
+			provider-supplied role information.
+		</p>
+
+		<h3>Network information</h3>
+		<p>
+			Cloudflare processes standard request information, including IP address, request route,
+			timing, and security signals, to deliver and protect the authentication service. Livefeed
+			uses the connecting IP only as a rate-limit key. It does not use this information for
+			advertising or product analytics.
+		</p>
+
+		<h3>Website data</h3>
+		<p>
+			The Livefeed website does not set analytics or advertising cookies and does not include
+			application-level tracking.
+		</p>
+	</section>
+
+	<section id="use">
+		<h2>How information is used</h2>
+		<p>Livefeed handles information only to:</p>
+		<ul>
+			<li>complete Google or Twitch authorization;</li>
+			<li>refresh provider access tokens without distributing provider client secrets;</li>
+			<li>identify your account and current live stream;</li>
+			<li>load and display live chat in the CLI;</li>
+			<li>protect the public authentication service from abuse; and</li>
+			<li>diagnose failures when you report them.</li>
+		</ul>
+		<p>
+			Where applicable, processing is based on your consent when you authorize a provider, the
+			need to provide the service you requested, and our legitimate interest in securing the
+			authentication service.
+		</p>
+	</section>
+
+	<section id="storage">
+		<h2>Storage and retention</h2>
+
+		<h3>On your device</h3>
+		<p>
+			Refresh tokens and basic account identifiers are stored through Bun’s secrets API in your
+			operating system’s credential manager. They remain there until you run
+			<code>livefeed yt logout</code> or <code>livefeed twitch logout</code>, revoke access with
+			the provider, or remove them through your operating system.
+		</p>
+
+		<h3>During browser authorization</h3>
+		<p>
+			The Cloudflare authentication service holds authorization state and provider tokens in an
+			isolated session for no more than five minutes. The session is deleted as soon as the
+			requesting CLI retrieves the tokens, or automatically when it expires.
+		</p>
+
+		<h3>During token refresh</h3>
+		<p>
+			Your refresh token passes through the authentication service so it can be exchanged with
+			Google or Twitch. Livefeed does not persist the token or the returned access token during
+			this operation.
+		</p>
+
+		<h3>Chat messages</h3>
+		<p>
+			Chat messages stay in the CLI process memory and are discarded when Livefeed exits. The
+			Livefeed authentication service does not receive or store chat messages.
+		</p>
+	</section>
+
+	<section id="sharing">
+		<h2>Service providers and disclosure</h2>
+		<p>Information is processed by the services required to operate Livefeed:</p>
+		<ul>
+			<li>
+				<strong>Google / YouTube</strong> for Google authorization, channel information,
+				broadcast discovery, and YouTube live chat.
+			</li>
+			<li>
+				<strong>Twitch</strong> for Twitch authorization, channel information, stream
+				discovery, and Twitch live chat.
+			</li>
+			<li>
+				<strong>Cloudflare</strong> for hosting, request delivery, temporary OAuth session
+				storage, and rate limiting.
+			</li>
+		</ul>
+		<p>
+			Those providers process information under their own privacy policies. Their infrastructure
+			may process data in countries outside your own. Livefeed does not sell personal
+			information or share it with data brokers or advertisers.
+		</p>
+		<p>
+			We may disclose information when legally required or when reasonably necessary to protect
+			the service, users, or the public. Because Livefeed intentionally retains little
+			information, we may have no data responsive to a request.
+		</p>
+	</section>
+
+	<section id="rights">
+		<h2>Your choices and rights</h2>
+		<p>You control the provider access granted to Livefeed. You may:</p>
+		<ul>
+			<li>decline authorization or cancel the browser flow;</li>
+			<li>log out through the CLI and remove the saved local credential;</li>
+			<li>revoke Livefeed through your Google or Twitch account settings; and</li>
+			<li>request access, correction, or deletion of information we may hold.</li>
+		</ul>
+		<p>
+			You can review or revoke Livefeed’s Google access from the
+			<a href="https://myaccount.google.com/connections">Google third-party connections page</a>.
+			Twitch connections can be managed from your Twitch account’s Connections settings.
+		</p>
+		<p>
+			Privacy rights vary by location. Where laws such as the GDPR, UK GDPR, CCPA, or CPRA
+			apply, you may also have rights to restrict or object to processing, receive portable data,
+			or complain to a supervisory authority. We will not discriminate against you for exercising
+			a legal right.
+		</p>
+	</section>
+
+	<section id="security">
+		<h2>Security</h2>
+		<p>
+			Livefeed uses HTTPS, OAuth state validation, PKCE verification, short-lived isolated
+			authorization sessions, scoped provider access, system credential storage, security
+			headers, and rate limiting. Provider client secrets stay on the Cloudflare Worker and are
+			not distributed in the npm package.
+		</p>
+		<p>
+			No method of storage or transmission is completely secure. Keep your device and provider
+			accounts protected, and revoke Livefeed access if you believe a credential has been
+			compromised.
+		</p>
+	</section>
+
+	<section id="children">
+		<h2>Children’s privacy</h2>
+		<p>
+			Livefeed is a developer tool and is not directed to children under 13. We do not knowingly
+			collect personal information from children. If you believe a child has provided information
+			through the service, contact the project so the issue can be investigated.
+		</p>
+	</section>
+
+	<section id="changes">
+		<h2>Changes and contact</h2>
+		<p>
+			We may update this policy when Livefeed’s features or data practices change. The effective
+			date at the top will be revised, and material changes will be documented in the public
+			repository.
+		</p>
+		<p>
+			For privacy questions or requests, open an issue in the
+			<a href="https://github.com/DeepanshuMishraa/livefeed/issues">Livefeed issue tracker</a>.
+			Do not include access tokens, refresh tokens, or other credentials in a public issue.
+		</p>
+	</section>
+</LegalPage>

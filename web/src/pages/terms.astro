@@ -1,0 +1,199 @@
+---
+import LegalPage from "../layouts/LegalPage.astro";
+
+const sections = [
+  { id: "agreement", label: "Agreement and eligibility" },
+  { id: "service", label: "The service" },
+  { id: "accounts", label: "Accounts and security" },
+  { id: "acceptable-use", label: "Acceptable use" },
+  { id: "content", label: "Content and ownership" },
+  { id: "third-parties", label: "Third-party services" },
+  { id: "availability", label: "Availability" },
+  { id: "disclaimers", label: "Disclaimers and liability" },
+  { id: "termination", label: "Termination" },
+  { id: "changes", label: "Changes and contact" },
+] as const;
+---
+
+<LegalPage
+	title="Terms of service — livefeed"
+	description="Terms governing use of the Livefeed CLI, website, and authentication service."
+	heading="Terms of service"
+	summary="These terms govern the Livefeed command-line application, website, and hosted authentication service."
+	effectiveDate="25 July 2026"
+	active="terms"
+	sections={sections}
+>
+	<section id="agreement">
+		<h2>Agreement and eligibility</h2>
+		<p>
+			By downloading, installing, or using Livefeed, you agree to these terms. If you use
+			Livefeed for an organization, you represent that you are authorized to accept these terms
+			for that organization.
+		</p>
+		<p>
+			You must be at least 13 years old and legally permitted to use Google, YouTube, Twitch, and
+			Cloudflare services in your location. If applicable law requires a higher minimum age, that
+			higher age applies.
+		</p>
+	</section>
+
+	<section id="service">
+		<h2>The service</h2>
+		<p>
+			Livefeed is an open-source, read-only terminal client that discovers an active YouTube or
+			Twitch stream associated with your authorized account and displays its live chat. The
+			hosted authentication service keeps provider client secrets out of the distributed CLI.
+		</p>
+		<p>
+			Livefeed does not broadcast video, manage stream settings, send chat messages, guarantee
+			chat history, or provide moderation tools. Features may change as provider APIs and the
+			open-source project evolve.
+		</p>
+		<p>
+			The current public version is provided without charge. There are no subscriptions,
+			automatic renewals, paid plans, or refunds.
+		</p>
+	</section>
+
+	<section id="accounts">
+		<h2>Accounts and security</h2>
+		<p>
+			Livefeed does not create a separate Livefeed account. You authenticate using your own
+			Google or Twitch account. You are responsible for:
+		</p>
+		<ul>
+			<li>keeping your device and provider accounts secure;</li>
+			<li>reviewing the scopes shown during provider authorization;</li>
+			<li>using Livefeed only with accounts you are authorized to access; and</li>
+			<li>revoking access promptly if a device or credential may be compromised.</li>
+		</ul>
+		<p>
+			Run <code>livefeed yt logout</code> or <code>livefeed twitch logout</code> to revoke and
+			remove the corresponding local credential.
+		</p>
+	</section>
+
+	<section id="acceptable-use">
+		<h2>Acceptable use</h2>
+		<p>You may not use Livefeed or its authentication service to:</p>
+		<ul>
+			<li>access an account, stream, or chat without authorization;</li>
+			<li>violate law, provider terms, privacy rights, or intellectual-property rights;</li>
+			<li>bypass rate limits or probe, overload, disrupt, or degrade the hosted service;</li>
+			<li>extract, disclose, or misuse another person’s credentials or private information;</li>
+			<li>impersonate the project or misrepresent an unofficial build as an official release;</li>
+			<li>introduce malicious code or use automated traffic that materially harms the service; or</li>
+			<li>use the OAuth broker as authentication infrastructure for another product.</li>
+		</ul>
+		<p>
+			These restrictions do not limit rights granted by the project’s open-source license or
+			applicable law, including legitimate security research conducted responsibly.
+		</p>
+	</section>
+
+	<section id="content">
+		<h2>Content and ownership</h2>
+		<p>
+			You retain your rights in your account information and content. Livefeed claims no
+			ownership of chat messages or provider data. The CLI temporarily processes that content
+			only to display it on your device.
+		</p>
+		<p>
+			Livefeed’s source code is licensed under the MIT License. The license governs your rights
+			to use, copy, modify, and distribute the software. These terms do not grant rights to
+			third-party names, logos, APIs, or content.
+		</p>
+	</section>
+
+	<section id="third-parties">
+		<h2>Third-party services</h2>
+		<p>
+			Livefeed depends on Google, YouTube, Twitch, Cloudflare, your operating system’s credential
+			manager, npm, and Bun. Your use of those services remains subject to their own terms and
+			policies.
+		</p>
+		<p>
+			Use of Livefeed’s YouTube functionality is also subject to the
+			<a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the
+			<a href="https://developers.google.com/youtube/terms/api-services-terms-of-service">
+				YouTube API Services Terms of Service
+			</a>.
+		</p>
+		<p>
+			Provider outages, API changes, revoked credentials, disabled live chat, quota restrictions,
+			or changes to third-party terms may interrupt or permanently alter Livefeed. We do not
+			control those services and are not responsible for their acts or omissions.
+		</p>
+	</section>
+
+	<section id="availability">
+		<h2>Availability and support</h2>
+		<p>
+			Livefeed is provided as an open-source project without a service-level agreement. The CLI,
+			website, and authentication service may be unavailable, rate limited, modified, or
+			discontinued at any time.
+		</p>
+		<p>
+			Community support and issue reporting are available through the public GitHub repository.
+			No response time or resolution is guaranteed.
+		</p>
+	</section>
+
+	<section id="disclaimers">
+		<h2>Disclaimers and limitation of liability</h2>
+		<p>
+			<strong>
+				To the fullest extent permitted by law, Livefeed is provided “as is” and “as available,”
+				without warranties of any kind, whether express, implied, or statutory.
+			</strong>
+			We do not warrant that Livefeed will be uninterrupted, secure, error-free, compatible with
+			every terminal, or able to retrieve every stream or message.
+		</p>
+		<p>
+			To the fullest extent permitted by law, the Livefeed project and its maintainers will not
+			be liable for indirect, incidental, special, consequential, exemplary, or punitive damages,
+			or for lost data, revenue, profits, goodwill, or business interruption arising from use of
+			the service.
+		</p>
+		<p>
+			Where liability cannot legally be excluded, aggregate liability will not exceed the greater
+			of the amount you paid for Livefeed in the twelve months before the claim or USD 10. Some
+			jurisdictions do not allow certain exclusions or limitations, so these provisions may not
+			apply to you. Nothing in these terms excludes rights or liability that cannot be excluded
+			under applicable law.
+		</p>
+	</section>
+
+	<section id="termination">
+		<h2>Suspension and termination</h2>
+		<p>
+			You may stop using Livefeed at any time and revoke provider access. We may block or limit
+			access to the hosted authentication service when reasonably necessary to address abuse,
+			security risk, legal requirements, or violations of these terms.
+		</p>
+		<p>
+			Provisions concerning ownership, third-party services, disclaimers, liability, and any
+			terms that by their nature should survive will remain effective after use ends.
+		</p>
+	</section>
+
+	<section id="changes">
+		<h2>Changes, applicable law, and contact</h2>
+		<p>
+			We may update these terms as Livefeed changes. The effective date will be revised and
+			material changes will be documented in the repository. Continued use after an update means
+			you accept the revised terms where permitted by law.
+		</p>
+		<p>
+			Applicable law and courts with jurisdiction govern these terms without overriding mandatory
+			consumer protections available to you. If a provision is unenforceable, the remaining
+			provisions remain effective. A failure to enforce a provision is not a waiver.
+		</p>
+		<p>
+			Questions about these terms may be submitted through the
+			<a href="https://github.com/DeepanshuMishraa/livefeed/issues">Livefeed issue tracker</a>.
+			Do not post credentials or private account information.
+		</p>
+	</section>
+</LegalPage>

@@ -2,6 +2,12 @@
 
 Astro marketing site for livefeed.
 
+Static routes:
+
+- `/` — product and command reference
+- `/privacy` — privacy policy
+- `/terms` — terms of service
+
 ```sh
 bun install
 bun run dev

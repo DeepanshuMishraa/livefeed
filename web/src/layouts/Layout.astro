@@ -1,10 +1,11 @@
 ---
 type Props = {
-	title: string;
-	description: string;
+  title: string;
+  description: string;
+  robots?: string;
 };
 
-const { title, description } = Astro.props;
+const { title, description, robots = "index, follow" } = Astro.props;
 ---
 
 <!doctype html>
@@ -13,20 +14,34 @@ const { title, description } = Astro.props;
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="description" content={description} />
-		<meta name="theme-color" content="#f4f0e8" />
+		<meta name="robots" content={robots} />
+		<meta name="theme-color" content="#f4f3ee" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://github.com/DeepanshuMishraa/livefeed" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap"
 			rel="stylesheet"
 		/>
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<script is:inline>
+			(() => {
+				const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+					? "dark"
+					: "light";
+				try {
+					const storedTheme = localStorage.getItem("livefeed-theme");
+					document.documentElement.dataset.theme =
+						storedTheme === "light" || storedTheme === "dark" ? storedTheme : preferredTheme;
+				} catch {
+					document.documentElement.dataset.theme = preferredTheme;
+				}
+			})();
+		</script>
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">Skip to content</a>
@@ -36,25 +51,45 @@ const { title, description } = Astro.props;
 
 <style is:global>
 	:root {
-		--canvas: oklch(95.5% 0.018 79);
-		--canvas-deep: oklch(91.5% 0.025 77);
-		--ink: oklch(19% 0.025 61);
-		--ink-soft: oklch(43% 0.025 64);
-		--line: oklch(80% 0.027 72);
-		--accent: oklch(53% 0.17 28);
-		--accent-deep: oklch(40% 0.14 28);
-		--accent-light: oklch(72% 0.16 31);
-		--paper: oklch(98% 0.012 82);
-		--font-sans: "Instrument Sans", "Helvetica Neue", sans-serif;
+		--canvas: #f4f3ee;
+		--surface: #eeece5;
+		--surface-muted: #e4e1d8;
+		--ink: #161714;
+		--ink-muted: #65665f;
+		--line: #d1cfc6;
+		--line-strong: #96968e;
+		--accent: oklch(52% 0.14 145);
+		--accent-dark: oklch(44% 0.13 145);
+		--terminal: var(--canvas);
+		--terminal-muted: var(--ink-muted);
+		--terminal-line: var(--line);
+		--font-sans: "Archivo", "Helvetica Neue", sans-serif;
 		--font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
 		--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-		--page-gutter: clamp(1.25rem, 4vw, 4.5rem);
-		--page-width: 82rem;
+		--page-gutter: clamp(1rem, 3vw, 3rem);
+		--page-width: 100rem;
 		font-family: var(--font-sans);
 		color: var(--ink);
 		background: var(--canvas);
 		font-synthesis: none;
 		text-rendering: optimizeLegibility;
+	}
+
+	:root[data-theme="dark"] {
+		color-scheme: dark;
+		--canvas: #000000;
+		--surface: #050505;
+		--surface-muted: #0d0d0d;
+		--ink: #eeeeea;
+		--ink-muted: #92928c;
+		--line: #242424;
+		--line-strong: #555555;
+		--accent: oklch(77% 0.14 145);
+		--accent-dark: oklch(67% 0.13 145);
+	}
+
+	:root[data-theme="light"] {
+		color-scheme: light;
 	}
 
 	* {
@@ -64,12 +99,18 @@ const { title, description } = Astro.props;
 	html {
 		scroll-behavior: smooth;
 		scroll-padding-top: 2rem;
+		scrollbar-width: none;
+	}
+
+	html::-webkit-scrollbar {
+		display: none;
 	}
 
 	body {
 		min-width: 20rem;
 		margin: 0;
 		background: var(--canvas);
+		-webkit-font-smoothing: antialiased;
 	}
 
 	button,
@@ -82,7 +123,7 @@ const { title, description } = Astro.props;
 	}
 
 	::selection {
-		color: var(--paper);
+		color: var(--canvas);
 		background: var(--accent);
 	}
 
@@ -92,7 +133,7 @@ const { title, description } = Astro.props;
 		top: 0.75rem;
 		left: 0.75rem;
 		padding: 0.75rem 1rem;
-		color: var(--paper);
+		color: var(--surface);
 		background: var(--ink);
 		transform: translateY(-200%);
 		transition: transform 180ms var(--ease-out);
@@ -103,8 +144,8 @@ const { title, description } = Astro.props;
 	}
 
 	:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 4px;
+		outline: 1px solid var(--accent);
+		outline-offset: 3px;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

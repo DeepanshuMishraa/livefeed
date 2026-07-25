@@ -1,8 +1,8 @@
 ---
 type Props = {
-	command: string;
-	label?: string;
-	large?: boolean;
+  command: string;
+  label?: string;
+  large?: boolean;
 };
 
 const { command, label = "Copy command", large = false } = Astro.props;
@@ -47,19 +47,19 @@ const { command, label = "Copy command", large = false } = Astro.props;
 		grid-template-columns: auto minmax(0, 1fr) auto;
 		align-items: center;
 		gap: 0.75rem;
-		min-height: 3.5rem;
+		min-height: 3.75rem;
 		padding: 0.5rem 0.5rem 0.5rem 1rem;
 		border: 1px solid var(--line);
-		background: var(--paper);
+		background: var(--surface);
 		transition:
-			border-color 220ms var(--ease-out),
-			transform 220ms var(--ease-out);
+			border-color 180ms var(--ease-out),
+			background-color 180ms var(--ease-out);
 	}
 
 	.command.large {
-		min-height: 5rem;
+		min-height: 4.75rem;
 		padding-left: clamp(1rem, 3vw, 1.75rem);
-		border-color: var(--ink);
+		border-color: var(--line-strong);
 	}
 
 	.prompt,
@@ -89,14 +89,14 @@ const { command, label = "Copy command", large = false } = Astro.props;
 	button {
 		display: inline-flex;
 		min-width: 3rem;
-		min-height: 2.5rem;
+		min-height: 2.75rem;
 		align-items: center;
 		justify-content: center;
 		gap: 0.4rem;
 		padding: 0.5rem 0.75rem;
 		border: 0;
-		color: var(--ink-soft);
-		background: var(--canvas-deep);
+		color: var(--ink-muted);
+		background: var(--surface-muted);
 		cursor: pointer;
 		font-size: 0.7rem;
 		transition:
@@ -114,8 +114,8 @@ const { command, label = "Copy command", large = false } = Astro.props;
 	}
 
 	button[data-copied] {
-		color: var(--paper);
-		background: var(--accent-deep);
+		color: var(--canvas);
+		background: var(--accent-dark);
 	}
 
 	button:active {
@@ -124,12 +124,12 @@ const { command, label = "Copy command", large = false } = Astro.props;
 
 	@media (hover: hover) {
 		.command:hover {
-			border-color: var(--ink-soft);
-			transform: translateY(-2px);
+			border-color: var(--ink-muted);
+			background: color-mix(in oklch, var(--surface) 88%, var(--accent));
 		}
 
 		button:hover {
-			color: var(--paper);
+			color: var(--surface);
 			background: var(--ink);
 		}
 	}

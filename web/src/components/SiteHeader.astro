@@ -1,0 +1,93 @@
+---
+import IconLink from "./IconLink.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+
+type Props = {
+  active?: "home" | "privacy" | "terms";
+};
+
+const { active = "home" } = Astro.props;
+---
+
+<header class="site-header">
+	<a class="wordmark" href="/" aria-label="Livefeed home">livefeed</a>
+
+	<nav aria-label="Primary navigation">
+		<a href="/#product" aria-current={active === "home" ? "page" : undefined}>Product</a>
+		<a href="/#commands">Commands</a>
+		<a href="/privacy" aria-current={active === "privacy" ? "page" : undefined}>Privacy</a>
+		<a href="/terms" aria-current={active === "terms" ? "page" : undefined}>Terms</a>
+		<ThemeToggle />
+		<IconLink
+			href="https://github.com/DeepanshuMishraa/livefeed"
+			label="GitHub"
+			icon="github"
+			iconOnly
+		/>
+	</nav>
+</header>
+
+<style>
+	.site-header {
+		display: flex;
+		width: min(100%, var(--page-width));
+		min-height: 4rem;
+		align-items: center;
+		justify-content: space-between;
+		margin-inline: auto;
+		padding-inline: var(--page-gutter);
+		border-bottom: 1px solid var(--line);
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+	}
+
+	.wordmark {
+		font-family: var(--font-sans);
+		font-size: 0.95rem;
+		font-weight: 650;
+		letter-spacing: -0.025em;
+		text-decoration: none;
+	}
+
+	nav {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: clamp(1rem, 2.5vw, 2rem);
+	}
+
+	nav > a {
+		display: inline-flex;
+		min-height: 2.75rem;
+		align-items: center;
+		color: var(--ink-muted);
+		text-decoration: none;
+		transition: color 150ms linear;
+	}
+
+	nav > a[aria-current="page"] {
+		color: var(--ink);
+	}
+
+	@media (hover: hover) {
+		nav > a:hover {
+			color: var(--ink);
+		}
+	}
+
+	@media (max-width: 43rem) {
+		.site-header {
+			min-height: 3.75rem;
+		}
+
+		nav > a:nth-child(-n + 2) {
+			display: none;
+		}
+	}
+
+	@media (max-width: 25rem) {
+		nav {
+			gap: 0.75rem;
+		}
+	}
+</style>

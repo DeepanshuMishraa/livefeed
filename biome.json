@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "files": {
-    "includes": ["**", "!src/generated", "!dist", "!coverage"]
+    "includes": ["**", "!src/generated", "!dist", "!coverage", "!web/.astro", "!web/dist"]
   },
   "formatter": {
     "enabled": true,
@@ -22,5 +22,13 @@
       "quoteStyle": "double",
       "semicolons": "always"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["web/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
 }

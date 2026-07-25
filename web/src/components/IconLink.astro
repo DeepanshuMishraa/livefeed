@@ -1,13 +1,14 @@
 ---
-type Icon = "github" | "npm" | "privacy";
+type Icon = "github" | "npm";
 
 type Props = {
-	href: string;
-	label: string;
-	icon: Icon;
+  href: string;
+  label: string;
+  icon: Icon;
+  iconOnly?: boolean;
 };
 
-const { href, label, icon } = Astro.props;
+const { href, label, icon, iconOnly = false } = Astro.props;
 ---
 
 <a href={href} aria-label={label}>
@@ -27,15 +28,7 @@ const { href, label, icon } = Astro.props;
 			</svg>
 		)
 	}
-	{
-		icon === "privacy" && (
-			<svg aria-hidden="true" viewBox="0 0 24 24">
-				<path d="M12 3 5 6v5c0 4.7 2.9 8.3 7 10 4.1-1.7 7-5.3 7-10V6l-7-3Z"></path>
-				<path d="m9.2 12 1.8 1.8 3.9-4"></path>
-			</svg>
-		)
-	}
-	<span>{label}</span>
+	<span class:list={{ "visually-hidden": iconOnly }}>{label}</span>
 </a>
 
 <style>
@@ -44,8 +37,8 @@ const { href, label, icon } = Astro.props;
 		min-height: 2.75rem;
 		align-items: center;
 		gap: 0.5rem;
-		color: var(--ink-soft);
-		font-size: 0.82rem;
+		color: var(--ink-muted);
+		font-size: 0.76rem;
 		text-decoration: none;
 		transition: color 140ms var(--ease-out);
 	}
@@ -58,17 +51,18 @@ const { href, label, icon } = Astro.props;
 		transition: transform 180ms var(--ease-out);
 	}
 
-	svg path + path {
-		fill: none;
-		stroke: var(--canvas);
-		stroke-linecap: square;
-		stroke-linejoin: miter;
-		stroke-width: 1.7;
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	@media (hover: hover) {
 		a:hover {
-			color: var(--accent-deep);
+			color: var(--ink);
 		}
 
 		a:hover svg {

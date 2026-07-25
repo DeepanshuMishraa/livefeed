@@ -1,178 +1,140 @@
 ---
 const messages = [
-	{ kind: "viewer", name: "mara", message: "audio is crisp today" },
-	{ kind: "viewer", name: "niko", message: "the new layout looks so clean" },
-	{ kind: "viewer", name: "sam", message: "does this work with unlisted streams?" },
-	{ kind: "system", name: "livefeed", message: "yes — public, private, or unlisted" },
+  { author: "maya_dev", message: "audio is clean now", color: "cyan" },
+  { author: "northstar", message: "does this pick up unlisted streams?", color: "purple" },
+  { author: "dipxsy", message: "yes — visibility does not matter", color: "blue" },
+  { author: "buildwithsam", message: "the terminal view is much easier to follow", color: "green" },
+  { author: "nulladdict", message: "chat history loaded too?", color: "pink" },
+  { author: "dipxsy", message: "yep, then it follows new messages", color: "blue" },
+  { author: "cosmastech", message: "this is staying open on the second monitor", color: "gold" },
 ] as const;
 ---
 
-<div class="terminal-preview" aria-label="Example Livefeed chat">
-	<header>
-		<div class="status">
-			<span aria-hidden="true"></span>
-			Live · YouTube
-		</div>
-		<span>4 watching</span>
-	</header>
+<figure class="terminal" aria-label="Accurate preview of Livefeed displaying YouTube chat">
+  <p class="status">
+    <span aria-hidden="true">●</span> connected<span class="status-detail">
+      · Building livefeed · q quit</span
+    >
+  </p>
 
-	<div class="feed">
-		<p class="connection"><span>✓</span> connected to “Building livefeed”</p>
-		{
-			messages.map((message, index) => (
-				<p
-					class:list={["message", { system: message.kind === "system" }]}
-					style={`--message-index: ${index}`}
-				>
-					<span class="name">{message.name}</span>
-					<span class="separator">:</span>
-					{message.message}
-				</p>
-			))
-		}
-	</div>
-
-	<footer>
-		<span>livefeed yt</span>
-		<span>read only</span>
-	</footer>
-</div>
+  <div class="messages">
+    {
+      messages.map((message, index) => (
+        <p class="message" style={`--row: ${index}`}>
+          <strong class={message.color}>{message.author}</strong>
+          <span class="separator">: </span>
+          {message.message}
+        </p>
+      ))
+    }
+  </div>
+</figure>
 
 <style>
-	.terminal-preview {
-		position: relative;
-		display: grid;
-		min-height: 31rem;
-		overflow: hidden;
-		grid-template-rows: auto 1fr auto;
-		color: var(--paper);
-		background: var(--ink);
-		box-shadow: 1.25rem 1.25rem 0 var(--accent);
-	}
+  .terminal {
+    --cli-primary: #d9dbea;
+    --cli-muted: #777f96;
+    --cli-connected: #78c7a3;
+    --author-cyan: #79c7c5;
+    --author-purple: #c9a7eb;
+    --author-blue: #8fb8e8;
+    --author-green: #93c47d;
+    --author-pink: #e3a6b8;
+    --author-gold: #d6b86a;
+    display: flex;
+    min-height: clamp(24rem, min(32vw, 55vh), 30rem);
+    flex-direction: column;
+    margin: 0;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    overflow: hidden;
+    color: var(--cli-primary);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: clamp(0.72rem, 1vw, 0.86rem);
+    line-height: 1.7;
+  }
 
-	header,
-	footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 1.25rem;
-		color: color-mix(in oklch, var(--paper) 58%, var(--ink));
-		font-family: var(--font-mono);
-		font-size: 0.65rem;
-		letter-spacing: 0.055em;
-		text-transform: uppercase;
-	}
+  :global(html[data-theme="light"]) .terminal {
+    --cli-primary: #242424;
+    --cli-muted: #656565;
+    --cli-connected: #247653;
+    --author-cyan: #006b68;
+    --author-purple: #6f42a6;
+    --author-blue: #265f9e;
+    --author-green: #39752a;
+    --author-pink: #9b3f62;
+    --author-gold: #806300;
+  }
 
-	header {
-		border-bottom: 1px solid color-mix(in oklch, var(--paper) 14%, var(--ink));
-	}
+  .status {
+    margin: 0;
+    color: var(--cli-connected);
+  }
 
-	footer {
-		border-top: 1px solid color-mix(in oklch, var(--paper) 14%, var(--ink));
-	}
+  .messages {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 3rem;
+  }
 
-	.status {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.55rem;
-		color: var(--paper);
-	}
+  .message {
+    margin: 0;
+    color: var(--cli-primary);
+    animation: row-in 420ms var(--ease-out) both;
+    animation-delay: calc(120ms + var(--row) * 70ms);
+  }
 
-	.status span {
-		width: 0.45rem;
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: var(--accent-light);
-		box-shadow: 0 0 0 0.2rem color-mix(in oklch, var(--accent) 28%, transparent);
-		animation: signal 2.4s ease-in-out infinite;
-	}
+  .message strong {
+    font-weight: 500;
+  }
 
-	.feed {
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		padding: clamp(1.25rem, 3vw, 2rem);
-		font-family: var(--font-mono);
-		font-size: clamp(0.72rem, 1vw, 0.82rem);
-		line-height: 1.65;
-	}
+  .separator {
+    color: var(--cli-muted);
+  }
 
-	.feed p {
-		margin: 0;
-	}
+  .cyan {
+    color: var(--author-cyan);
+  }
 
-	.connection {
-		margin-bottom: auto !important;
-		color: color-mix(in oklch, var(--paper) 45%, var(--ink));
-		font-size: 0.68rem;
-	}
+  .purple {
+    color: var(--author-purple);
+  }
 
-	.connection span {
-		color: var(--accent-light);
-	}
+  .blue {
+    color: var(--author-blue);
+  }
 
-	.message {
-		color: color-mix(in oklch, var(--paper) 78%, var(--ink));
-		animation: message-in 560ms var(--ease-out) both;
-		animation-delay: calc(180ms + var(--message-index) * 110ms);
-	}
+  .green {
+    color: var(--author-green);
+  }
 
-	.name {
-		color: var(--accent-light);
-	}
+  .pink {
+    color: var(--author-pink);
+  }
 
-	.separator {
-		margin-right: 0.45em;
-		color: color-mix(in oklch, var(--paper) 32%, var(--ink));
-	}
+  .gold {
+    color: var(--author-gold);
+  }
 
-	.system {
-		color: var(--paper);
-	}
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.45rem);
+    }
+  }
 
-	.system .name {
-		color: oklch(83% 0.12 95);
-	}
+  @media (max-width: 64rem) {
+    .status-detail {
+      display: none;
+    }
+  }
 
-	@keyframes message-in {
-		from {
-			opacity: 0;
-			transform: translateY(0.8rem);
-		}
-	}
-
-	@keyframes signal {
-		50% {
-			opacity: 0.55;
-			transform: scale(0.82);
-		}
-	}
-
-	@media (max-width: 54rem) {
-		.terminal-preview {
-			min-height: 25rem;
-			box-shadow: 0.75rem 0.75rem 0 var(--accent);
-		}
-	}
-
-	@media (max-width: 25rem) {
-		header,
-		footer {
-			padding-inline: 1rem;
-		}
-
-		header > span:last-child {
-			display: none;
-		}
-
-		.terminal-preview {
-			min-height: 22rem;
-			box-shadow: 0.5rem 0.5rem 0 var(--accent);
-		}
-
-		.feed {
-			padding: 1rem;
-			font-size: 0.68rem;
-		}
-	}
+  @media (max-width: 45rem) {
+    .terminal {
+      min-height: 23rem;
+      padding-inline: 0;
+    }
+  }
 </style>
