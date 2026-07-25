@@ -32,8 +32,8 @@ const behavior = [
 ---
 
 <Layout
-	title="livefeed — live chat in your terminal"
-	description="Read YouTube and Twitch live chat from a terminal-native feed."
+	title="Livefeed — YouTube and Twitch live chat in your terminal"
+	description="Livefeed is a read-only CLI that finds your active YouTube or Twitch stream and displays its live chat in the terminal."
 >
 	<SiteHeader />
 
@@ -46,8 +46,14 @@ const behavior = [
           <span>CHAT</span>
         </h1>
         <p class="hero-copy">
-          Live chat in the terminal. Livefeed finds the stream, waits when you are offline, and
-          reconnects without losing the conversation.
+          Livefeed is a read-only command-line app for viewing YouTube and Twitch live chat in your
+          terminal. It finds the active stream, loads recent messages, waits when you are offline,
+          and reconnects without losing the conversation.
+        </p>
+        <p class="access-copy">
+          Google authorization is used only to identify your YouTube channel, find its active
+          broadcast, and read that broadcast’s live chat. Livefeed cannot upload videos, change
+          stream settings, or send messages.
         </p>
         <div class="hero-install">
           <p>Install with Bun · v{packageJson.version}</p>
@@ -67,7 +73,7 @@ const behavior = [
 				</div>
 				<div class="manual-body name-body">
 					<p class="definition">
-						<strong>livefeed</strong> — a read-only live chat client for streamers who work
+						<strong>Livefeed</strong> — a read-only live chat client for streamers who work
 						from the terminal.
 					</p>
 					<p>
@@ -119,7 +125,10 @@ const behavior = [
 						refresh token in the operating system credential manager.
 					</p>
 					<div class="auth-facts">
-						<p><span>YouTube</span> Read-only channel, broadcast, and live chat access.</p>
+						<p>
+							<span>YouTube</span> Identifies your channel, finds its active broadcast, and
+							reads live chat. It cannot modify your channel or stream.
+						</p>
 						<p><span>Twitch</span> <code>user:read:chat</code> only.</p>
 						<p><span>Authentication server</span> OAuth sessions expire after five minutes.</p>
 						<p><span>Chat data</span> Kept in process memory; discarded on exit.</p>
@@ -132,7 +141,7 @@ const behavior = [
 		<section class="end-block" aria-labelledby="end-title">
 			<div>
 				<p>Install</p>
-				<h2 id="end-title">Install livefeed.</h2>
+				<h2 id="end-title">Install Livefeed.</h2>
 			</div>
 			<Command command="bun add --global livefeed" label="Copy install command" large />
 		</section>
@@ -224,6 +233,16 @@ const behavior = [
     margin: 0;
     color: var(--ink-muted);
     font-size: clamp(0.92rem, 1.2vw, 1.08rem);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .access-copy {
+    max-width: 28rem;
+    margin: 1rem 0 0;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
     line-height: 1.6;
     text-wrap: pretty;
   }
