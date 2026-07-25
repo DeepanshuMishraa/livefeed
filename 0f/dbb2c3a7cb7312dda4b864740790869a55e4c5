@@ -1,0 +1,35 @@
+web/src/pages/index.astro
+  s_761f31499b05c9::t_7939ae1e25c0f4 35-36,49-56,76,128-131,144,240-245
+  s_761f31499b05c9::t_336a2e92d0c4ff 246-248
+  s_761f31499b05c9::t_817adb3eff83e4 249
+web/src/components/SiteHeader.astro
+  s_761f31499b05c9::t_7939ae1e25c0f4 13
+web/astro.config.mjs
+  s_761f31499b05c9::t_7939ae1e25c0f4 6
+  s_761f31499b05c9::t_1edd365672b1f4 5,7
+web/src/components/SiteFooter.astro
+  s_761f31499b05c9::t_7939ae1e25c0f4 6
+web/src/pages/privacy.astro
+  s_761f31499b05c9::t_7939ae1e25c0f4 18
+web/src/layouts/Layout.astro
+  s_761f31499b05c9::t_1edd365672b1f4 9-10,21,25,27-44
+  s_761f31499b05c9::t_7939ae1e25c0f4 26
+web/src/pages/terms.astro
+  s_761f31499b05c9::t_7939ae1e25c0f4 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0fdbb2c3a7cb7312dda4b864740790869a55e4c5",
+  "prompts": {},
+  "sessions": {
+    "s_761f31499b05c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f93a1-57b3-7860-a8eb-30359ae19d7b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
