@@ -5,7 +5,7 @@ import type { LivefeedError } from "./errors";
 
 const SERVICE = "dev.livefeed.cli";
 const NAME = "twitch";
-const DEFAULT_AUTH_SERVER = "https://livefeed-auth.d4deepanshu723.workers.dev";
+const DEFAULT_AUTH_SERVER = "https://livefeed-auth.dipxsy.app";
 
 const credentialSchema = v.object({
   refreshToken: v.string(),

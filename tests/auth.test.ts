@@ -35,7 +35,7 @@ describe("accessToken", () => {
     );
 
     expect(result).toMatchObject({ value: "access-token" });
-    expect(requestUrl).toBe("https://livefeed-auth.d4deepanshu723.workers.dev/v1/oauth/refresh");
+    expect(requestUrl).toBe("https://livefeed-auth.dipxsy.app/v1/oauth/refresh");
     expect(requestBody).toEqual({ refreshToken: "refresh-token" });
   });
 
