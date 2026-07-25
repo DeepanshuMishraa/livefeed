@@ -1,0 +1,23 @@
+tests/auth.test.ts
+  s_6df18db0bebc0e::t_0e7dba6848eb20 38
+src/twitch-auth.ts
+  s_6df18db0bebc0e::t_077893cb2d7c04 8
+src/auth.ts
+  s_6df18db0bebc0e::t_ceb86ee407c4e1 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "fb2cb08d9b7b2e57db43fb98df74ae7e45f8e27a",
+  "prompts": {},
+  "sessions": {
+    "s_6df18db0bebc0e": {
+      "agent_id": {
+        "tool": "pi",
+        "id": "019f98a0-f476-7824-b06b-d8639d586106",
+        "model": "deepseek-v4-flash"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
