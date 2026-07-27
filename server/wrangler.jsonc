@@ -3,7 +3,13 @@
   "name": "livefeed-auth",
   "main": "src/index.ts",
   "compatibility_date": "2026-07-24",
-  "workers_dev": true,
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "livefeed-auth.dipxsy.app",
+      "custom_domain": true
+    }
+  ],
   "observability": {
     "enabled": true
   },
