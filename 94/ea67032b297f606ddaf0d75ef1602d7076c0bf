@@ -1,0 +1,20 @@
+server/wrangler.jsonc
+  s_4ab019ada2c978::t_6d2b489dcc0992 6
+  s_4ab019ada2c978::t_a940bac1820872 7-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "94ea67032b297f606ddaf0d75ef1602d7076c0bf",
+  "prompts": {},
+  "sessions": {
+    "s_4ab019ada2c978": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa48b-7911-76f2-a753-34a4384938b3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
