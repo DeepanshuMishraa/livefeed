@@ -1,6 +1,6 @@
 {
   "name": "livefeed",
-  "version": "0.0.6",
+  "version": "0.0.1",
   "description": "YouTube and Twitch live chat, native to your terminal.",
   "license": "MIT",
   "repository": {
@@ -28,7 +28,9 @@
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
     "build": "bun run scripts/build.ts",
-    "deploy": "bun run check && npm version patch --no-git-tag-version && bun run build && npm publish --access public",
+    "deploy": "bun run check && bun run build && npm publish --access public --tag latest",
+    "release:patch": "npm version patch --no-git-tag-version && bun run deploy",
+    "release:minor": "npm version minor --no-git-tag-version && bun run deploy",
     "generate:proto": "grpc_tools_node_protoc --proto_path=proto --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=outputServices=grpc-js,env=node,useExactTypes=true,esModuleInterop=true proto/stream_list.proto",
     "check": "bun run generate:proto && bun run format:check && bun run lint && bun run typecheck && bun run test",
     "format": "biome format --write .",

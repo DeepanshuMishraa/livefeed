@@ -73,11 +73,15 @@ in macOS Keychain or Linux Secret Service. There is no analytics or advertising.
 ## Release
 
 ```sh
-npm run deploy
+npm run release:patch
 ```
 
-The deploy script runs every check, builds the CLI, increments the patch version without creating a
-Git tag, and publishes the public npm package. For example, `0.0.1` becomes `0.0.2`.
+The release script increments the version without creating a Git tag, runs every check, builds the
+CLI, and publishes the public npm package with the `latest` tag. Run `npm run release:minor` when
+incrementing the minor version instead. The next releases should be `0.0.2`, then `0.1.0`; versions
+`0.0.3`, `0.0.4`, and `0.0.6` have already been used and cannot be republished.
+
+Use `npm run deploy` to publish the exact version already set in `package.json`.
 
 ## License
 
