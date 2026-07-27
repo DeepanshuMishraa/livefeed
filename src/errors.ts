@@ -19,6 +19,11 @@ export type LivefeedError =
   | { readonly _tag: "TwitchOAuthCallbackFailed"; readonly reason: string }
   | { readonly _tag: "TwitchTokenRejected" }
   | { readonly _tag: "TwitchServiceFailure"; readonly status: number; readonly reason: string }
+  | {
+      readonly _tag: "TwitchHistoryUnavailable";
+      readonly operation: "load" | "save";
+      readonly reason: string;
+    }
   | { readonly _tag: "InvalidTwitchResponse"; readonly operation: string };
 
 export const LivefeedError = {
@@ -64,6 +69,8 @@ export const LivefeedError = {
         return "Twitch rejected the saved login. Run `livefeed twitch auth` to reconnect your account.";
       case "TwitchServiceFailure":
         return `Twitch returned ${error.status}: ${error.reason}. Existing messages are preserved; retry shortly.`;
+      case "TwitchHistoryUnavailable":
+        return `Twitch chat history could not be ${error.operation === "load" ? "loaded" : "saved"}: ${error.reason}. ${error.operation === "load" ? "The saved file was left unchanged" : "Previously saved messages remain intact"}; check permissions for livefeed's data directory and retry.`;
       case "InvalidTwitchResponse":
         return `Twitch returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
     }

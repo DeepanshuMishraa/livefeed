@@ -5,15 +5,15 @@ import { accessToken, authenticate, loadCredentials, logout } from "./auth";
 import { parseCommand } from "./cli";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import type { FeedClient } from "./feed";
+import { runTui } from "./tui";
+import { findActiveTwitchBroadcast, loadTwitchChatHistory, openTwitchChatStream } from "./twitch";
 import {
   authenticateTwitch,
   loadTwitchCredentials,
   logoutTwitch,
-  twitchAccessToken,
   type TwitchCredentials,
+  twitchAccessToken,
 } from "./twitch-auth";
-import { findActiveTwitchBroadcast, loadTwitchChatHistory, openTwitchChatStream } from "./twitch";
-import { runTui } from "./tui";
 import { findActiveBroadcast, loadChatHistory, openChatStream } from "./youtube";
 
 const VERSION = packageJson.version;
@@ -113,6 +113,13 @@ function twitchFeed(credentials: TwitchCredentials): FeedClient {
     findActiveBroadcast: (token) => findActiveTwitchBroadcast(token, credentials),
     loadChatHistory: loadTwitchChatHistory,
     openChatStream: (token, liveChatId, pageToken, callbacks) =>
-      openTwitchChatStream(token, liveChatId, pageToken, callbacks, credentials.clientId),
+      openTwitchChatStream(
+        token,
+        liveChatId,
+        pageToken,
+        callbacks,
+        credentials.clientId,
+        credentials.userId,
+      ),
   };
 }

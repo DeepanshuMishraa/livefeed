@@ -1,9 +1,10 @@
 import { Result, type Result as ResultType } from "better-result";
 import * as v from "valibot";
-import type { Broadcast, ChatEvent, AuthorRole } from "./domain";
+import type { AuthorRole, Broadcast, ChatEvent } from "./domain";
 import type { LivefeedError } from "./errors";
 import type { ChatConnection, ChatHistory, ChatStreamCallbacks } from "./feed";
 import type { TwitchCredentials } from "./twitch-auth";
+import { defaultTwitchChatHistory, type TwitchChatHistoryStore } from "./twitch-history";
 
 type Fetcher = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -76,21 +77,27 @@ export async function findActiveTwitchBroadcast(
     id: stream.id,
     title: stream.title,
     actualStartTime: stream.started_at,
-    liveChatId: stream.user_id,
+    liveChatId: stream.id,
   });
 }
 
-export async function loadTwitchChatHistory(): Promise<ResultType<ChatHistory, LivefeedError>> {
-  return Result.ok({ events: [], nextPageToken: "" });
+export async function loadTwitchChatHistory(
+  _accessToken: string,
+  streamId: string,
+  history: TwitchChatHistoryStore = defaultTwitchChatHistory,
+): Promise<ResultType<ChatHistory, LivefeedError>> {
+  return history.load(streamId);
 }
 
 export function openTwitchChatStream(
   accessToken: string,
-  broadcasterUserId: string,
+  streamId: string,
   _pageToken: string,
   callbacks: ChatStreamCallbacks,
   clientId: string,
+  broadcasterUserId: string,
   fetcher: Fetcher = globalThis.fetch,
+  history: TwitchChatHistoryStore = defaultTwitchChatHistory,
 ): ChatConnection {
   let socket: WebSocket | null = null;
   let cancelled = false;
@@ -199,7 +206,15 @@ export function openTwitchChatStream(
           notification.output.event,
           envelope.output.metadata.message_timestamp ?? "",
         );
-        if (message) callbacks.onMessages([message]);
+        if (!message) return;
+        void history.append(streamId, message).then((saved) => {
+          if (cancelled) return;
+          if (Result.isError(saved)) {
+            fail(saved.error);
+            return;
+          }
+          callbacks.onMessages([message]);
+        });
       });
     });
     socket.addEventListener("close", () => {

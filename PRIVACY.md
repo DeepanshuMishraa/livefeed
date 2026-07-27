@@ -4,7 +4,10 @@ livefeed requests read-only access to the authenticated user's YouTube or Twitch
 identify an active stream and read that stream's live chat.
 
 - OAuth credentials are stored in the operating system's encrypted credential manager.
-- Chat messages remain in memory only and are discarded when livefeed exits.
+- YouTube chat messages remain in memory only and are discarded when livefeed exits.
+- The latest 2,000 Twitch messages received by livefeed are stored locally so the current stream
+  can be restored after restarting the CLI. Starting a different Twitch stream replaces that
+  history.
 - Google and Twitch authentication requests pass through the Livefeed Cloudflare Worker. During
   sign-in, access and refresh tokens are held in an isolated, five-minute session until the
   requesting CLI retrieves them. The session is deleted immediately after retrieval or when it

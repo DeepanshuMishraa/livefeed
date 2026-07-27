@@ -37,7 +37,7 @@ describe("findActiveTwitchBroadcast", () => {
       value: {
         id: "stream-1",
         title: "Building livefeed",
-        liveChatId: "broadcaster-1",
+        liveChatId: "stream-1",
       },
     });
     expect(requestedUrl?.searchParams.get("user_id")).toBe("broadcaster-1");

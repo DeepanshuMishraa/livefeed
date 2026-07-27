@@ -35,8 +35,9 @@ Authentication opens in your browser. No stream key, pasted token, or client sec
 You can start `livefeed` before going live. It stays open, reports that the stream is offline, and
 connects automatically within about ten seconds of the broadcast starting. When joining an active
 YouTube stream, it loads YouTube's available chat history—up to the latest 2,000 messages—before
-following new messages in real time. Twitch starts with messages received after the CLI connects
-because Twitch does not provide chat history through its API.
+following new messages in real time. Twitch does not provide chat history through its API, so
+livefeed keeps the latest 2,000 received Twitch messages locally and restores them when reopening
+the same stream.
 
 | Command | Action |
 | --- | --- |
