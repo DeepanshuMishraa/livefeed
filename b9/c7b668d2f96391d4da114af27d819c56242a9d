@@ -1,0 +1,24 @@
+package.json
+  s_1c8a77d6b9874c::t_34d5ac7e976a6e 31-33
+  s_1c8a77d6b9874c::t_925074acc87024 3
+.github/workflows/release.yml
+  s_1c8a77d6b9874c::t_34d5ac7e976a6e 26
+README.md
+  s_1c8a77d6b9874c::t_34d5ac7e976a6e 76,79-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b9c7b668d2f96391d4da114af27d819c56242a9d",
+  "prompts": {},
+  "sessions": {
+    "s_1c8a77d6b9874c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa234-f0c8-7652-832a-6c6e0902f97d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
