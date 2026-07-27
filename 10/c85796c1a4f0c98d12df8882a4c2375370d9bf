@@ -1,0 +1,37 @@
+src/errors.ts
+  s_4ab019ada2c978::t_1c4158955f90c7 22-26,72-73
+tests/twitch-history.test.ts
+  s_4ab019ada2c978::t_467e0c691818a3 1-67
+src/twitch.ts
+  s_4ab019ada2c978::t_459bd8be17e18b 80,84-89,94,98,100,209-217
+  s_4ab019ada2c978::t_024b86ef5ad676 3,7
+src/index.tsx
+  s_4ab019ada2c978::t_459bd8be17e18b 116-123
+  s_4ab019ada2c978::t_024b86ef5ad676 8-9,15
+src/twitch-history.ts
+  s_4ab019ada2c978::t_1c4158955f90c7 1-21,23-30,32-82,84-138
+  s_4ab019ada2c978::t_5949435bb158ce 83
+  s_4ab019ada2c978::t_024b86ef5ad676 22,31
+tests/twitch.test.ts
+  s_4ab019ada2c978::t_467e0c691818a3 40
+PRIVACY.md
+  s_4ab019ada2c978::t_89759d5192ba9c 7-10
+README.md
+  s_4ab019ada2c978::t_89759d5192ba9c 38-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "10c85796c1a4f0c98d12df8882a4c2375370d9bf",
+  "prompts": {},
+  "sessions": {
+    "s_4ab019ada2c978": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa48b-7911-76f2-a753-34a4384938b3",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
