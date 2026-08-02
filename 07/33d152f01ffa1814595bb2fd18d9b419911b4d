@@ -1,0 +1,41 @@
+package.json
+  s_fafaafc76ee092::t_754b7c173a403e 45
+tests/cli.test.ts
+  s_fafaafc76ee092::t_f2eff16eaee770 9
+src/provider-selector.ts
+  s_fafaafc76ee092::t_2cadfa4afe8159 44-54
+src/demo.ts
+  s_fafaafc76ee092::t_3533557ebcb097 1-23,25-32,34,36-47,49-139
+  s_fafaafc76ee092::t_d4b65d7a30083a 24,33,35,48
+src/index.tsx
+  s_fafaafc76ee092::t_2cadfa4afe8159 20,63
+  s_fafaafc76ee092::t_22a65b5769a92a 6,41,62,64-66
+src/cli.ts
+  s_fafaafc76ee092::t_81e7fab6dd62d0 5,15
+web/src/pages/index.astro
+  s_fafaafc76ee092::t_864019fa3ee7c4 13
+README.md
+  s_fafaafc76ee092::t_22a65b5769a92a 31,57
+  s_fafaafc76ee092::t_bc2b480370d5ec 41-44
+tests/demo.test.ts
+  s_fafaafc76ee092::t_df31d1cc074e40 1-58,60-68
+  s_fafaafc76ee092::t_68970d64f9b190 59
+bun.lock
+  s_fafaafc76ee092::t_b58fa88f370276 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "0733d152f01ffa1814595bb2fd18d9b419911b4d",
+  "prompts": {},
+  "sessions": {
+    "s_fafaafc76ee092": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc15c-5127-7db3-b2e3-706ceef42ca8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
