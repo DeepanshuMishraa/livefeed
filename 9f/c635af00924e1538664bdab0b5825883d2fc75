@@ -1,0 +1,21 @@
+README.md
+  s_22078c58ac9823::t_e05099623db7ec 87-88
+package.json
+  s_22078c58ac9823::t_e05099623db7ec 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "9fc635af00924e1538664bdab0b5825883d2fc75",
+  "prompts": {},
+  "sessions": {
+    "s_22078c58ac9823": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc0ee-e671-71f1-894b-bd0fa29aad9e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
