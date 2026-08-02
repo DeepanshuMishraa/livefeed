@@ -1,14 +1,20 @@
-<aside class="provider-graph" aria-label="YouTube and Twitch connect to Livefeed">
+<aside class="provider-graph" aria-label="YouTube, Twitch, and Kick connect to Livefeed">
 	<div class="graph">
-		<svg class="connections" viewBox="0 0 240 220" aria-hidden="true">
-			<path class="connection connection-youtube" d="M48 45 120 174"></path>
-			<path class="connection connection-twitch" d="m192 45-72 129"></path>
-			<circle cx="48" cy="45" r="3"></circle>
-			<circle cx="192" cy="45" r="3"></circle>
-			<circle class="merge-point" cx="120" cy="174" r="4"></circle>
+		<div class="livefeed-node">
+			<span aria-hidden="true"></span>
+			<strong>LIVEFEED</strong>
+		</div>
+
+		<svg class="connections" viewBox="0 0 300 340" aria-hidden="true">
+			<path class="connection connection-trunk" d="M150 0v208"></path>
+			<path class="connection connection-youtube" d="M150 208 50 340"></path>
+			<path class="connection connection-twitch" d="M150 208v132"></path>
+			<path class="connection connection-kick" d="m150 208 100 132"></path>
+			<circle class="source-point" cx="150" cy="208" r="4.5"></circle>
 		</svg>
 
-		<div class="node youtube-node">
+		<div class="provider-nodes">
+		<div class="node">
 			<svg
 				class="brand-mark youtube-mark"
 				xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +31,7 @@
 			</svg>
 		</div>
 
-		<div class="node twitch-node">
+		<div class="node">
 			<svg
 				class="brand-mark twitch-mark"
 				xmlns="http://www.w3.org/2000/svg"
@@ -44,9 +50,23 @@
 			</svg>
 		</div>
 
-		<div class="node livefeed-node">
-			<span aria-hidden="true"></span>
-			<strong>LIVEFEED</strong>
+		<div class="node">
+			<svg
+				class="brand-mark kick-mark"
+				viewBox="0 0 933 300"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-label="Kick"
+				role="img"
+			>
+				<path
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M0 0H100V66.6667H133.333V33.3333H166.667V0H266.667V100H233.333V133.333H200V166.667H233.333V200H266.667V300H166.667V266.667H133.333V233.333H100V300H0V0ZM666.667 0H766.667V66.6667H800V33.3333H833.333V0H933.333V100H900V133.333H866.667V166.667H900V200H933.333V300H833.333V266.667H800V233.333H766.667V300H666.667V0ZM300 0H400V300H300V0ZM533.333 0H466.667V33.3333H433.333V266.667H466.667V300H633.333V200H533.333V100H633.333V0H533.333Z"
+					fill="#53FC18"
+				></path>
+			</svg>
+		</div>
 		</div>
 	</div>
 </aside>
@@ -60,73 +80,12 @@
 	}
 
 	.graph {
-		position: relative;
-		width: min(100%, 20.5rem);
-		aspect-ratio: 240 / 220;
-		transform: translateY(3rem);
-	}
-
-	.connections {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		overflow: visible;
-		fill: var(--accent);
-	}
-
-	.connection {
-		fill: none;
-		stroke: var(--accent);
-		stroke-width: 1.5;
-		stroke-dasharray: 3 8;
-		stroke-linecap: square;
-		animation: signal-flow 1.8s linear infinite;
-	}
-
-	.connection-twitch {
-		animation-delay: -0.9s;
-	}
-
-	.merge-point {
-		transform-box: fill-box;
-		transform-origin: center;
-		animation: merge-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-	}
-
-	.node {
-		position: absolute;
 		display: grid;
-		place-items: center;
-		transform: translate(-50%, -50%);
-	}
-
-	.youtube-node {
-		top: 20.5%;
-		left: 20%;
-	}
-
-	.twitch-node {
-		top: 20.5%;
-		left: 80%;
-	}
-
-	.brand-mark {
-		display: block;
-		height: auto;
-	}
-
-	.youtube-mark {
-		width: 5.5rem;
-	}
-
-	.twitch-mark {
-		width: 4.6rem;
+		width: 100%;
+		grid-template-rows: auto auto auto;
 	}
 
 	.livefeed-node {
-		top: 79%;
-		left: 50%;
 		display: flex;
 		min-height: 3.15rem;
 		align-items: center;
@@ -147,6 +106,65 @@
 		font-size: 0.8rem;
 		font-weight: 650;
 		letter-spacing: 0.08em;
+	}
+
+	.connections {
+		display: block;
+		width: 100%;
+		height: auto;
+		fill: var(--accent);
+	}
+
+	.connection {
+		fill: none;
+		stroke: var(--accent);
+		stroke-width: 1.5;
+		stroke-dasharray: 3 8;
+		stroke-linecap: square;
+		animation: signal-flow 1.8s linear infinite;
+	}
+
+	.connection-twitch {
+		animation-delay: -0.9s;
+	}
+
+	.connection-kick {
+		animation-delay: -0.45s;
+	}
+
+	.source-point {
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: merge-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+	}
+
+	.provider-nodes {
+		display: grid;
+		width: 100%;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		align-items: start;
+	}
+
+	.node {
+		display: grid;
+		justify-items: center;
+	}
+
+	.brand-mark {
+		display: block;
+		height: auto;
+	}
+
+	.youtube-mark {
+		width: 4.6rem;
+	}
+
+	.twitch-mark {
+		width: 3.5rem;
+	}
+
+	.kick-mark {
+		width: 5.2rem;
 	}
 
 	@keyframes signal-flow {
@@ -172,16 +190,16 @@
 		0%,
 		65%,
 		100% {
-			transform: translate(-50%, -50%) scale(1);
+			transform: scale(1);
 		}
 		75% {
-			transform: translate(-50%, -50%) scale(1.025);
+			transform: scale(1.025);
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.connection,
-		.merge-point,
+		.source-point,
 		.livefeed-node {
 			animation: none;
 		}
@@ -196,26 +214,34 @@
 		}
 
 		.graph {
-			width: 9rem;
-			transform: none;
-		}
-
-		.youtube-mark {
-			width: 2.7rem;
-		}
-
-		.twitch-mark {
-			width: 2.2rem;
+			width: 9.5rem;
 		}
 
 		.livefeed-node {
-			min-height: 2rem;
+			min-height: 1.9rem;
 			gap: 0.4rem;
 			padding-inline: 0.55rem;
 		}
 
+		.livefeed-node span {
+			width: 0.35rem;
+			height: 0.35rem;
+		}
+
 		.livefeed-node strong {
-			font-size: 0.52rem;
+			font-size: 0.5rem;
+		}
+
+		.youtube-mark {
+			width: 2.4rem;
+		}
+
+		.twitch-mark {
+			width: 1.9rem;
+		}
+
+		.kick-mark {
+			width: 2.7rem;
 		}
 	}
 </style>

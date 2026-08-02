@@ -1,4 +1,4 @@
-export type Provider = "youtube" | "twitch";
+export type Provider = "youtube" | "twitch" | "kick";
 
 export type Command =
   | { readonly _tag: "run-auto" }
@@ -25,10 +25,8 @@ export type AutomaticProvider =
   | { readonly _tag: "choose" };
 
 export function automaticProvider(authenticated: ReadonlySet<Provider>): AutomaticProvider {
-  const hasYouTube = authenticated.has("youtube");
-  const hasTwitch = authenticated.has("twitch");
-  if (hasYouTube && hasTwitch) return { _tag: "choose" };
-  if (hasYouTube) return { _tag: "selected", provider: "youtube" };
-  if (hasTwitch) return { _tag: "selected", provider: "twitch" };
-  return { _tag: "none" };
+  if (authenticated.size === 0) return { _tag: "none" };
+  if (authenticated.size > 1) return { _tag: "choose" };
+  const provider = authenticated.values().next().value;
+  return provider ? { _tag: "selected", provider } : { _tag: "none" };
 }

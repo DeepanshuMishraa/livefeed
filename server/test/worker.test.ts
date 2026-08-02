@@ -82,6 +82,32 @@ describe("livefeed auth worker", () => {
     expect(authorizationUrl.searchParams.get("state")).toContain(payload.sessionId);
   });
 
+  it("creates a short-lived Kick authorization session", async () => {
+    const response = await app.request(
+      "https://auth.livefeed.test/v1/oauth/kick/sessions",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ codeChallenge: validChallenge }),
+      },
+      env,
+    );
+    const payload: unknown = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(payload).toMatchObject({ expiresInSeconds: 300, pollIntervalSeconds: 2 });
+    if (!isSessionResponse(payload)) throw new Error("Expected an OAuth session response.");
+    const authorizationUrl = new URL(payload.authorizationUrl);
+    expect(authorizationUrl.origin).toBe("https://id.kick.com");
+    expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+      "https://auth.livefeed.test/v1/oauth/kick/callback",
+    );
+    expect(authorizationUrl.searchParams.get("scope")).toBe(
+      "user:read channel:read events:subscribe",
+    );
+    expect(authorizationUrl.searchParams.get("code_challenge_method")).toBe("S256");
+  });
+
   it("keeps token exchange pending until the browser callback finishes", async () => {
     const session = await sessionPayload();
     const response = await app.request(
@@ -161,6 +187,23 @@ describe("livefeed auth worker", () => {
         code: "authorization_failed",
         message: "Google authorization was cancelled.",
       },
+    });
+  });
+
+  it("rejects unsigned Kick webhook events", async () => {
+    const response = await app.request(
+      "https://auth.livefeed.test/v1/webhooks/kick",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message_id: "forged" }),
+      },
+      env,
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: { code: "invalid_webhook", message: "Kick webhook validation failed." },
     });
   });
 });

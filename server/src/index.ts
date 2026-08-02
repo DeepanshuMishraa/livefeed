@@ -5,6 +5,8 @@ import {
   createSessionSchema,
   exchangeSessionSchema,
   googleTokenSchema,
+  KICK_SCOPE,
+  kickTokenSchema,
   parseOAuthState,
   parsePublicOrigin,
   POLL_INTERVAL_SECONDS,
@@ -17,15 +19,19 @@ import {
   YOUTUBE_SCOPE,
 } from "./domain";
 import { OAuthSession } from "./oauth-session";
+import { KickChatRelay } from "./kick-chat-relay";
+import { KickOAuthSession } from "./kick-oauth-session";
+import { verifiedKickEvent } from "./kick-webhook";
 import { authorizationPage } from "./page";
 import { TwitchOAuthSession } from "./twitch-oauth-session";
 
-export { OAuthSession, TwitchOAuthSession };
+export { KickChatRelay, KickOAuthSession, OAuthSession, TwitchOAuthSession };
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", async (context, next) => {
   await next();
+  if (context.req.header("upgrade")?.toLowerCase() === "websocket") return;
   context.header("cache-control", "no-store");
   context.header("referrer-policy", "no-referrer");
   context.header("x-content-type-options", "nosniff");
@@ -398,6 +404,215 @@ app.post("/v1/oauth/twitch/refresh", async (context) => {
       );
 });
 
+app.post("/v1/oauth/kick/sessions", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "kick-sessions"))) {
+    return rateLimitedResponse();
+  }
+  const clientAddress = context.req.header("cf-connecting-ip") ?? "unknown";
+  if (!(await allowed(context.env.SESSION_RATE_LIMITER, `kick-session:${clientAddress}`))) {
+    return rateLimitedResponse();
+  }
+  const config = kickConfiguration(context.env);
+  if (!config.ok) return context.json(config.error, 500);
+  const body = await validJson(context.req.raw, createSessionSchema);
+  if (!body.ok) return context.json(body.error, 400);
+
+  const sessionId = randomBase64Url(24);
+  const browserState = randomBase64Url(32);
+  const kickCodeVerifier = randomBase64Url(64);
+  const kickCodeChallenge = await sha256Base64Url(kickCodeVerifier);
+  const expiresAt = Date.now() + SESSION_LIFETIME_MS;
+  const stub = context.env.KICK_OAUTH_SESSIONS.get(
+    context.env.KICK_OAUTH_SESSIONS.idFromName(sessionId),
+  );
+  const created = await stub.fetch("https://kick-oauth-session/create", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      browserState,
+      clientCodeChallenge: body.value.codeChallenge,
+      kickCodeVerifier,
+      expiresAt,
+    }),
+  });
+  if (!created.ok) {
+    await created.body?.cancel();
+    return context.json(
+      apiError("session_unavailable", "The Kick sign-in session could not be created."),
+      503,
+    );
+  }
+  await created.body?.cancel();
+
+  const authorizeUrl = new URL("https://id.kick.com/oauth/authorize");
+  authorizeUrl.search = new URLSearchParams({
+    client_id: context.env.KICK_CLIENT_ID,
+    redirect_uri: config.redirectUri,
+    response_type: "code",
+    scope: KICK_SCOPE,
+    state: `${sessionId}.${browserState}`,
+    code_challenge: kickCodeChallenge,
+    code_challenge_method: "S256",
+  }).toString();
+  return context.json(
+    {
+      sessionId,
+      authorizationUrl: authorizeUrl.toString(),
+      expiresInSeconds: SESSION_LIFETIME_MS / 1000,
+      pollIntervalSeconds: POLL_INTERVAL_SECONDS,
+    },
+    201,
+  );
+});
+
+app.get("/v1/oauth/kick/callback", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "kick-callback"))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
+  }
+  const config = kickConfiguration(context.env);
+  if (!config.ok) return context.redirect("/v1/oauth/complete?status=error", 303);
+  const parsedState = parseOAuthState(context.req.query("state") ?? "");
+  if (!parsedState) return context.redirect("/v1/oauth/complete?status=error", 303);
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `kick-callback:${parsedState.sessionId}`))) {
+    return context.redirect("/v1/oauth/complete?status=rate_limited", 303);
+  }
+  const stub = context.env.KICK_OAUTH_SESSIONS.get(
+    context.env.KICK_OAUTH_SESSIONS.idFromName(parsedState.sessionId),
+  );
+  const response = await stub.fetch("https://kick-oauth-session/callback", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      browserState: parsedState.browserState,
+      code: context.req.query("code"),
+      error: context.req.query("error"),
+      redirectUri: config.redirectUri,
+    }),
+  });
+  if (response.ok) {
+    await response.body?.cancel();
+    return context.redirect("/v1/oauth/complete", 303);
+  }
+  await response.body?.cancel();
+  return context.redirect("/v1/oauth/complete?status=error", 303);
+});
+
+app.post("/v1/oauth/kick/token", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "kick-token"))) {
+    return rateLimitedResponse();
+  }
+  const body = await validJson(context.req.raw, exchangeSessionSchema);
+  if (!body.ok) return context.json(body.error, 400);
+  if (!(await allowed(context.env.POLL_RATE_LIMITER, `kick-poll:${body.value.sessionId}`))) {
+    return rateLimitedResponse();
+  }
+  const stub = context.env.KICK_OAUTH_SESSIONS.get(
+    context.env.KICK_OAUTH_SESSIONS.idFromName(body.value.sessionId),
+  );
+  const response = await stub.fetch("https://kick-oauth-session/exchange", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ codeVerifier: body.value.codeVerifier }),
+  });
+  return new Response(response.body, response);
+});
+
+app.post("/v1/oauth/kick/refresh", async (context) => {
+  if (!(await allowed(context.env.API_RATE_LIMITER, "kick-refresh"))) {
+    return rateLimitedResponse();
+  }
+  const config = kickConfiguration(context.env);
+  if (!config.ok) return context.json(config.error, 500);
+  const body = await validJson(context.req.raw, refreshTokenSchema);
+  if (!body.ok) return context.json(body.error, 400);
+  const refreshKey = await sha256Base64Url(body.value.refreshToken);
+  if (!(await allowed(context.env.REFRESH_RATE_LIMITER, `kick-refresh:${refreshKey}`))) {
+    return rateLimitedResponse();
+  }
+
+  let response: Response;
+  try {
+    response = await fetch("https://id.kick.com/oauth/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: context.env.KICK_CLIENT_ID,
+        client_secret: context.env.KICK_CLIENT_SECRET,
+        refresh_token: body.value.refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+  } catch {
+    return context.json(apiError("kick_unavailable", "Kick could not be reached."), 502);
+  }
+  if (response.status === 400 || response.status === 401) {
+    await response.body?.cancel();
+    return context.json(apiError("token_rejected", "Kick rejected the saved login."), 401);
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    return context.json(apiError("kick_unavailable", "Kick could not refresh the login."), 502);
+  }
+  const payload: unknown = await response.json();
+  const parsed = v.safeParse(kickTokenSchema, payload);
+  return parsed.success
+    ? context.json({
+        accessToken: parsed.output.access_token,
+        refreshToken: parsed.output.refresh_token,
+        expiresIn: parsed.output.expires_in,
+      })
+    : context.json(
+        apiError("invalid_kick_response", "Kick returned an unexpected token response."),
+        502,
+      );
+});
+
+app.get("/v1/kick/relay/:userId/history", async (context) => {
+  const relay = kickRelay(context.env, context.req.param("userId"));
+  if (!relay) return context.json(apiError("invalid_request", "Kick user ID was invalid."), 400);
+  return relay.fetch("https://kick-relay/history", {
+    headers: { authorization: context.req.header("authorization") ?? "" },
+  });
+});
+
+app.get("/v1/kick/relay/:userId/stream", async (context) => {
+  const relay = kickRelay(context.env, context.req.param("userId"));
+  if (!relay) return context.json(apiError("invalid_request", "Kick user ID was invalid."), 400);
+  return relay.fetch("https://kick-relay/stream", {
+    headers: context.req.raw.headers,
+  });
+});
+
+app.post("/v1/kick/relay/:userId/clear", async (context) => {
+  const relay = kickRelay(context.env, context.req.param("userId"));
+  if (!relay) return context.json(apiError("invalid_request", "Kick user ID was invalid."), 400);
+  return relay.fetch("https://kick-relay/clear", {
+    method: "POST",
+    headers: { authorization: context.req.header("authorization") ?? "" },
+  });
+});
+
+app.post("/v1/webhooks/kick", async (context) => {
+  const verified = await verifiedKickEvent(context.req.raw);
+  if (!verified.ok) {
+    return context.json(apiError("invalid_webhook", "Kick webhook validation failed."), 401);
+  }
+  const relay = context.env.KICK_CHAT_RELAYS.get(
+    context.env.KICK_CHAT_RELAYS.idFromName(String(verified.event.broadcasterUserId)),
+  );
+  const published = await relay.fetch("https://kick-relay/publish", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(verified.event.payload),
+  });
+  if (!published.ok) {
+    await published.body?.cancel();
+    return context.json(apiError("relay_unavailable", "Kick chat relay rejected the event."), 502);
+  }
+  await published.body?.cancel();
+  return new Response(null, { status: 204 });
+});
+
 app.notFound((context) =>
   context.json(apiError("not_found", "The requested endpoint does not exist."), 404),
 );
@@ -447,6 +662,30 @@ function twitchConfiguration(
           "The authorization server is missing a valid origin or Twitch OAuth credentials.",
         ),
       };
+}
+
+function kickConfiguration(
+  env: Bindings,
+):
+  | { readonly ok: true; readonly redirectUri: string }
+  | { readonly ok: false; readonly error: ReturnType<typeof apiError> } {
+  const origin = parsePublicOrigin(env.PUBLIC_ORIGIN);
+  return origin && env.KICK_CLIENT_ID && env.KICK_CLIENT_SECRET
+    ? { ok: true, redirectUri: new URL("/v1/oauth/kick/callback", origin).toString() }
+    : {
+        ok: false,
+        error: apiError(
+          "server_misconfigured",
+          "The authorization server is missing a valid origin or Kick OAuth credentials.",
+        ),
+      };
+}
+
+function kickRelay(env: Bindings, userId: string): DurableObjectStub<KickChatRelay> | null {
+  const parsed = v.safeParse(v.pipe(v.string(), v.regex(/^[1-9][0-9]*$/)), userId);
+  return parsed.success
+    ? env.KICK_CHAT_RELAYS.get(env.KICK_CHAT_RELAYS.idFromName(parsed.output))
+    : null;
 }
 
 async function validJson<TSchema extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>>(

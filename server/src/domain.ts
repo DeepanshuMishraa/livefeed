@@ -4,6 +4,7 @@ export const SESSION_LIFETIME_MS = 5 * 60 * 1000;
 export const POLL_INTERVAL_SECONDS = 2;
 export const YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
 export const TWITCH_SCOPE = "user:read:chat";
+export const KICK_SCOPE = "user:read channel:read events:subscribe";
 
 const base64UrlSchema = v.pipe(v.string(), v.regex(/^[A-Za-z0-9_-]+$/));
 
@@ -65,6 +66,12 @@ export const googleTokenSchema = v.object({
 });
 
 export const twitchTokenSchema = v.object({
+  access_token: v.string(),
+  expires_in: v.number(),
+  refresh_token: v.string(),
+});
+
+export const kickTokenSchema = v.object({
   access_token: v.string(),
   expires_in: v.number(),
   refresh_token: v.string(),

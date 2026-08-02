@@ -10,13 +10,13 @@ import packageJson from "../../../package.json";
 
 const commands = [
   { command: "livefeed", description: "Open the connected chat or choose a provider" },
-  { command: "livefeed auth", description: "Choose YouTube or Twitch and connect" },
-  { command: "livefeed logout", description: "Remove one login or sign out of both" },
+  { command: "livefeed auth", description: "Choose YouTube, Twitch, or Kick and connect" },
+  { command: "livefeed logout", description: "Remove one login or sign out of all providers" },
   { command: "livefeed update", description: "Install the latest published version" },
 ] as const;
 
 const statusRows = [
-  { label: "Providers", value: "2 / 2", measure: "100%" },
+  { label: "Providers", value: "3 / 3", measure: "100%" },
   { label: "Write access", value: "0", measure: "0%" },
   { label: "Local history", value: "2,000", measure: "82%" },
   { label: "Analytics", value: "none", measure: "0%" },
@@ -29,14 +29,15 @@ const authFacts = [
     "Finds public, unlisted, and private live broadcasts with read-only access.",
   ],
   ["AUTH_002", "Twitch", "Uses user:read:chat to receive your channel's live conversation."],
-  ["AUTH_003", "Credentials", "Refresh tokens stay in the operating system credential manager."],
-  ["AUTH_004", "Chat data", "Messages remain in process memory and are discarded on exit."],
+  ["AUTH_003", "Kick", "Receives signed chat events through Livefeed's read-only relay."],
+  ["AUTH_004", "Credentials", "Refresh tokens stay in the operating system credential manager."],
+  ["AUTH_005", "Chat data", "YouTube and Twitch messages stay local. Kick events cross the relay."],
 ] as const;
 ---
 
 <Layout
-	title="Livefeed | YouTube and Twitch live chat in your terminal"
-	description="Livefeed is a read-only CLI that finds your active YouTube or Twitch stream and displays its live chat in the terminal."
+	title="Livefeed | YouTube, Twitch, and Kick chat in your terminal"
+	description="Livefeed is a read-only CLI that finds your active YouTube, Twitch, or Kick stream and displays its live chat in the terminal."
 >
 	<SiteHeader />
 
@@ -51,7 +52,7 @@ const authFacts = [
 			<div class="hero-summary">
 				<div>
 					<p class="hero-thesis">
-						YouTube and Twitch chat, kept beside the code instead of behind another browser
+						YouTube, Twitch, and Kick chat, kept beside the code instead of behind another browser
 						window.
 					</p>
 					<p class="hero-note">
@@ -91,7 +92,7 @@ const authFacts = [
 				<div class="copy-columns">
 					<p>
 						Start it before going live. It waits offline, checks again, and connects without a
-						restart. If YouTube and Twitch are both connected, a compact shell prompt asks
+						restart. If multiple providers are connected, a compact shell prompt asks
 						which chat to open.
 					</p>
 					<p>
@@ -182,8 +183,8 @@ const authFacts = [
 			<div>
 				<h2 id="colophon-title">Your stream stays yours.</h2>
 				<p>
-					No analytics. No advertising. No chat relay. The source is public, the license is
-					MIT, and the feed runs locally.
+					No analytics. No advertising. Kick's signed webhook relay carries only the chat
+					required by the terminal feed. The source is public and the license is MIT.
 				</p>
 				<Command command="livefeed" label="Copy launch command" large />
 			</div>
@@ -498,19 +499,24 @@ const authFacts = [
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		border-top: 1px solid var(--line);
-		border-left: 1px solid var(--line);
 	}
 
 	.auth-grid article {
-		min-height: 13rem;
-		padding: clamp(1.25rem, 3vw, 2rem);
-		border-right: 1px solid var(--line);
+		padding: clamp(1.75rem, 3vw, 2.5rem) clamp(1.5rem, 3vw, 2.25rem);
 		border-bottom: 1px solid var(--line);
-		background: var(--surface);
+	}
+
+	.auth-grid article:nth-child(odd) {
+		border-right: 1px solid var(--line);
+	}
+
+	.auth-grid article:nth-child(5) {
+		grid-column: 1 / -1;
+		border-right: 0;
 	}
 
 	.auth-grid article > p:first-child {
-		margin: 0 0 2.5rem;
+		margin: 0 0 0.75rem;
 		color: var(--accent);
 		font-size: 0.58rem;
 		font-weight: 600;
@@ -518,7 +524,7 @@ const authFacts = [
 	}
 
 	.auth-grid h3 {
-		margin: 0 0 0.75rem;
+		margin: 0 0 0.5rem;
 		font-size: 0.82rem;
 		font-weight: 650;
 		text-transform: uppercase;
@@ -526,9 +532,10 @@ const authFacts = [
 
 	.auth-grid article > p:last-child {
 		margin: 0;
+		max-width: 32rem;
 		color: var(--ink-muted);
-		font-size: 0.72rem;
-		line-height: 1.65;
+		font-size: 0.76rem;
+		line-height: 1.6;
 	}
 
 	.colophon {
@@ -597,6 +604,10 @@ const authFacts = [
 		.copy-columns,
 		.auth-grid {
 			grid-template-columns: 1fr;
+		}
+
+		.auth-grid article:nth-child(odd) {
+			border-right: 0;
 		}
 
 		.copy-columns p + p {

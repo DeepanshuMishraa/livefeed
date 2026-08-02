@@ -11,6 +11,8 @@ export default defineConfig({
           GOOGLE_CLIENT_SECRET: "test-secret",
           TWITCH_CLIENT_ID: "test-twitch-client",
           TWITCH_CLIENT_SECRET: "test-twitch-secret",
+          KICK_CLIENT_ID: "test-kick-client",
+          KICK_CLIENT_SECRET: "test-kick-secret",
           PUBLIC_ORIGIN: "https://auth.livefeed.test",
         },
       },

@@ -25,7 +25,12 @@ export type LivefeedError =
       readonly operation: "load" | "save";
       readonly reason: string;
     }
-  | { readonly _tag: "InvalidTwitchResponse"; readonly operation: string };
+  | { readonly _tag: "InvalidTwitchResponse"; readonly operation: string }
+  | { readonly _tag: "KickUnauthenticated" }
+  | { readonly _tag: "KickOAuthCallbackFailed"; readonly reason: string }
+  | { readonly _tag: "KickTokenRejected" }
+  | { readonly _tag: "KickServiceFailure"; readonly status: number; readonly reason: string }
+  | { readonly _tag: "InvalidKickResponse"; readonly operation: string };
 
 export const LivefeedError = {
   message(error: LivefeedError): string {
@@ -76,6 +81,16 @@ export const LivefeedError = {
         return `Twitch chat history could not be ${error.operation === "load" ? "loaded" : "saved"}: ${error.reason}. ${error.operation === "load" ? "The saved file was left unchanged" : "Previously saved messages remain intact"}; check permissions for livefeed's data directory and retry.`;
       case "InvalidTwitchResponse":
         return `Twitch returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
+      case "KickUnauthenticated":
+        return "Not signed in to Kick. Run `livefeed auth`, choose Kick, then try again.";
+      case "KickOAuthCallbackFailed":
+        return `Kick sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed auth\` and choose Kick to retry.`;
+      case "KickTokenRejected":
+        return "Kick rejected the saved login. Run `livefeed auth` and choose Kick to reconnect your account.";
+      case "KickServiceFailure":
+        return `Kick returned ${error.status}: ${error.reason}. Existing messages are preserved; retry shortly.`;
+      case "InvalidKickResponse":
+        return `Kick returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
     }
   },
 } as const;

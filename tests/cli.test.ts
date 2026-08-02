@@ -26,7 +26,10 @@ describe("automaticProvider", () => {
     [[], { _tag: "none" }],
     [["youtube"], { _tag: "selected", provider: "youtube" }],
     [["twitch"], { _tag: "selected", provider: "twitch" }],
+    [["kick"], { _tag: "selected", provider: "kick" }],
     [["youtube", "twitch"], { _tag: "choose" }],
+    [["youtube", "kick"], { _tag: "choose" }],
+    [["youtube", "twitch", "kick"], { _tag: "choose" }],
   ] as const)("resolves authenticated providers %j", (providers, expected) => {
     expect(automaticProvider(new Set<Provider>(providers))).toEqual(expected);
   });

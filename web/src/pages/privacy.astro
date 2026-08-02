@@ -19,7 +19,7 @@ const sections = [
 	description="How Livefeed handles OAuth credentials, channel information, and live chat data."
 	heading="Privacy policy"
 	summary="Livefeed is a read-only terminal client. It does not sell personal information, run advertising, or include application analytics."
-	effectiveDate="25 July 2026"
+	effectiveDate="2 August 2026"
 	active="privacy"
 	sections={sections}
 >
@@ -31,9 +31,9 @@ const sections = [
 			authentication service.
 		</p>
 		<p>
-			Livefeed connects to Google’s YouTube APIs and Twitch APIs only after you authorize it. Its
-			purpose is limited to finding your active stream and displaying its live chat in your
-			terminal.
+			Livefeed connects to Google’s YouTube APIs, Twitch APIs, and Kick APIs only after you
+			authorize it. Its purpose is limited to finding your active stream and displaying its live
+			chat in your terminal.
 		</p>
 		<p>
 			Livefeed’s YouTube features use YouTube API Services. Google explains how it processes
@@ -54,8 +54,12 @@ const sections = [
 				identifier, login, and display name.
 			</li>
 			<li>
-				Livefeed requests the read-only YouTube scope and Twitch’s <code>user:read:chat</code>
-				scope.
+				For Kick: an OAuth access token, refresh token, user identifier, display name, relay
+				token, and webhook subscription identifiers.
+			</li>
+			<li>
+				Livefeed requests the read-only YouTube scope, Twitch’s <code>user:read:chat</code>, and
+				Kick’s <code>user:read</code>, <code>channel:read</code>, and <code>events:subscribe</code>.
 			</li>
 		</ul>
 
@@ -85,7 +89,7 @@ const sections = [
 		<h2>How information is used</h2>
 		<p>Livefeed handles information only to:</p>
 		<ul>
-			<li>complete Google or Twitch authorization;</li>
+			<li>complete Google, Twitch, or Kick authorization;</li>
 			<li>refresh provider access tokens without distributing provider client secrets;</li>
 			<li>identify your account and current live stream;</li>
 			<li>load and display live chat in the CLI;</li>
@@ -120,14 +124,17 @@ const sections = [
 		<h3>During token refresh</h3>
 		<p>
 			Your refresh token passes through the authentication service so it can be exchanged with
-			Google or Twitch. Livefeed does not persist the token or the returned access token during
-			this operation.
+			Google, Twitch, or Kick. Livefeed does not persist the token or the returned access token
+			during this operation.
 		</p>
 
 		<h3>Chat messages</h3>
 		<p>
-			Chat messages stay in the CLI process memory and are discarded when Livefeed exits. The
-			Livefeed authentication service does not receive or store chat messages.
+			YouTube chat stays in CLI process memory and is discarded when Livefeed exits. Livefeed
+			stores up to 2,000 Twitch messages on the local device for the current stream. Kick sends
+			signed chat webhooks to the Cloudflare service because Kick does not offer a direct chat
+			connection for CLI clients. The service retains at most 2,000 Kick messages for the current
+			stream and clears them when the stream ends, you log out, or 24 hours pass.
 		</p>
 	</section>
 
@@ -142,6 +149,10 @@ const sections = [
 			<li>
 				<strong>Twitch</strong> for Twitch authorization, channel information, stream
 				discovery, and Twitch live chat.
+			</li>
+			<li>
+				<strong>Kick</strong> for Kick authorization, channel information, stream discovery,
+				and signed live-chat webhooks.
 			</li>
 			<li>
 				<strong>Cloudflare</strong> for hosting, request delivery, temporary OAuth session
@@ -166,13 +177,13 @@ const sections = [
 		<ul>
 			<li>decline authorization or cancel the browser flow;</li>
 			<li>log out through the CLI and remove the saved local credential;</li>
-			<li>revoke Livefeed through your Google or Twitch account settings; and</li>
+			<li>revoke Livefeed through your Google, Twitch, or Kick account settings; and</li>
 			<li>request access, correction, or deletion of information we may hold.</li>
 		</ul>
 		<p>
 			You can review or revoke Livefeed’s Google access from the
 			<a href="https://myaccount.google.com/connections">Google third-party connections page</a>.
-			Twitch connections can be managed from your Twitch account’s Connections settings.
+			Twitch and Kick connections can be managed from their respective account settings.
 		</p>
 		<p>
 			Privacy rights vary by location. Where laws such as the GDPR, UK GDPR, CCPA, or CPRA
@@ -187,8 +198,8 @@ const sections = [
 		<p>
 			Livefeed uses HTTPS, OAuth state validation, PKCE verification, short-lived isolated
 			authorization sessions, scoped provider access, system credential storage, security
-			headers, and rate limiting. Provider client secrets stay on the Cloudflare Worker and are
-			not distributed in the npm package.
+			headers, webhook signature verification, and rate limiting. Provider client secrets stay on
+			the Cloudflare Worker and are not distributed in the npm package.
 		</p>
 		<p>
 			No method of storage or transmission is completely secure. Keep your device and provider

@@ -20,12 +20,14 @@ interface SelectorConfig<T extends string> {
 const providerChoices = [
   { value: "youtube", label: "YouTube", detail: "youtube.com" },
   { value: "twitch", label: "Twitch", detail: "twitch.tv" },
+  { value: "kick", label: "Kick", detail: "kick.com" },
 ] as const satisfies readonly Choice<Provider>[];
 
 const logoutChoices = [
   { value: "youtube", label: "YouTube", detail: "saved Google login" },
   { value: "twitch", label: "Twitch", detail: "saved Twitch login" },
-  { value: "all", label: "All accounts", detail: "YouTube and Twitch" },
+  { value: "kick", label: "Kick", detail: "saved Kick login" },
+  { value: "all", label: "All accounts", detail: "YouTube, Twitch, and Kick" },
 ] as const satisfies readonly Choice<LogoutTarget>[];
 
 export function selectProvider(): Promise<Provider | null> {
@@ -33,7 +35,7 @@ export function selectProvider(): Promise<Provider | null> {
     prompt: "Select a chat to open",
     action: "open",
     unavailable:
-      "Both YouTube and Twitch are connected, but choosing a chat requires an interactive terminal. Run `livefeed` from a terminal and try again.",
+      "Multiple providers are connected, but choosing a chat requires an interactive terminal. Run `livefeed` from a terminal and try again.",
     choices: providerChoices,
     confirmation: (label) => `✓ Opening ${label} chat`,
   });

@@ -1,22 +1,26 @@
 # livefeed auth server
 
-Cloudflare Worker that keeps Livefeed's Google and Twitch OAuth client secrets out of the
+Cloudflare Worker that keeps Livefeed's Google, Twitch, and Kick OAuth client secrets out of the
 distributed CLI.
 It uses Hono, PKCE, and short-lived Durable Object sessions.
 
 ## OAuth flow
 
 1. The CLI creates a local PKCE verifier and sends only its challenge to
-   `POST /v1/oauth/sessions` for Google or `POST /v1/oauth/twitch/sessions` for Twitch.
+   `POST /v1/oauth/sessions` for Google, `POST /v1/oauth/twitch/sessions` for Twitch, or
+   `POST /v1/oauth/kick/sessions` for Kick.
 2. The Worker returns the provider authorization URL. The CLI opens it and polls the matching
    token endpoint.
-3. Google returns to `/v1/oauth/callback`, or Twitch returns to
-   `/v1/oauth/twitch/callback`. The Worker exchanges the provider code and shows a
-   minimal success page.
+3. The provider returns to its matching callback. The Worker exchanges the provider code and shows
+   a minimal success page.
 4. The matching CLI receives the tokens once. The session is then deleted.
 5. Access-token refreshes go through `POST /v1/oauth/refresh` for YouTube or
-   `POST /v1/oauth/twitch/refresh` for Twitch, so client secrets never ship in the npm or Homebrew
-   package.
+   `POST /v1/oauth/twitch/refresh` for Twitch, or `POST /v1/oauth/kick/refresh` for Kick, so client
+   secrets never ship in the npm package.
+
+Kick chat uses signed webhooks. The Worker verifies each Kick signature, stores at most 2,000
+current-stream messages for up to 24 hours, and relays events to the authenticated CLI over a
+per-channel WebSocket.
 
 OAuth sessions expire after five minutes. Durable Object alarms remove abandoned sessions.
 
@@ -43,12 +47,21 @@ Create a Twitch **Confidential** application and add:
 http://127.0.0.1:8787/v1/oauth/twitch/callback
 ```
 
+Create a Kick application, enable webhooks, and add:
+
+```text
+http://127.0.0.1:8787/v1/oauth/kick/callback
+```
+
+Use `http://127.0.0.1:8787/v1/webhooks/kick` as the development webhook URL when it is externally
+reachable through a tunnel.
+
 Then:
 
 ```sh
 cd server
 cp .dev.vars.example .dev.vars
-# Fill in both providers' client IDs and client secrets.
+# Fill in all provider client IDs and client secrets.
 bun install
 bun run dev
 ```
@@ -66,6 +79,8 @@ bunx wrangler secret put GOOGLE_CLIENT_ID
 bunx wrangler secret put GOOGLE_CLIENT_SECRET
 bunx wrangler secret put TWITCH_CLIENT_ID
 bunx wrangler secret put TWITCH_CLIENT_SECRET
+bunx wrangler secret put KICK_CLIENT_ID
+bunx wrangler secret put KICK_CLIENT_SECRET
 bunx wrangler secret put PUBLIC_ORIGIN
 bun run deploy
 ```
@@ -81,6 +96,13 @@ Add this exact Twitch redirect URI:
 
 ```text
 https://auth.livefeed.example/v1/oauth/twitch/callback
+```
+
+Add this exact Kick redirect URI and webhook URL:
+
+```text
+https://auth.livefeed.example/v1/oauth/kick/callback
+https://auth.livefeed.example/v1/webhooks/kick
 ```
 
 Do not commit `.dev.vars`. Production secrets belong in Cloudflare.

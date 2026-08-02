@@ -6,6 +6,14 @@ import { automaticProvider, type Provider, parseCommand } from "./cli";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import type { FeedClient } from "./feed";
 import {
+  authenticateKick,
+  type KickCredentials,
+  kickAccessToken,
+  loadKickCredentials,
+  logoutKick,
+} from "./kick-auth";
+import { findActiveKickBroadcast, loadKickChatHistory, openKickChatStream } from "./kick";
+import {
   type LogoutTarget,
   selectAuthProvider,
   selectLogoutTarget,
@@ -24,7 +32,7 @@ import { findActiveBroadcast, loadChatHistory, openChatStream } from "./youtube"
 import { UpdateError, updateLivefeed } from "./update";
 
 const VERSION = packageJson.version;
-const HELP = `livefeed — YouTube and Twitch live chat, in the terminal
+const HELP = `livefeed — YouTube, Twitch, and Kick live chat, in the terminal
 
 Usage:
   livefeed                    Open the connected chat or choose a provider
@@ -74,9 +82,10 @@ switch (command._tag) {
     break;
   }
   case "run-auto": {
-    const [youtubeCredentials, twitchCredentials] = await Promise.all([
+    const [youtubeCredentials, twitchCredentials, kickCredentials] = await Promise.all([
       loadCredentials(),
       loadTwitchCredentials(),
+      loadKickCredentials(),
     ]);
 
     if (Result.isError(youtubeCredentials) && youtubeCredentials.error._tag !== "Unauthenticated") {
@@ -90,10 +99,15 @@ switch (command._tag) {
       printError(twitchCredentials.error);
       break;
     }
+    if (Result.isError(kickCredentials) && kickCredentials.error._tag !== "KickUnauthenticated") {
+      printError(kickCredentials.error);
+      break;
+    }
 
     const authenticated = new Set<Provider>();
     if (Result.isOk(youtubeCredentials)) authenticated.add("youtube");
     if (Result.isOk(twitchCredentials)) authenticated.add("twitch");
+    if (Result.isOk(kickCredentials)) authenticated.add("kick");
     const automatic = automaticProvider(authenticated);
 
     if (automatic._tag === "none") {
@@ -108,6 +122,8 @@ switch (command._tag) {
       await runYouTube(youtubeCredentials.value);
     } else if (provider === "twitch" && Result.isOk(twitchCredentials)) {
       await runTwitch(twitchCredentials.value);
+    } else if (provider === "kick" && Result.isOk(kickCredentials)) {
+      await runKick(kickCredentials.value);
     }
     break;
   }
@@ -122,6 +138,14 @@ async function authenticateProvider(provider: Provider): Promise<void> {
     return;
   }
 
+  if (provider === "kick") {
+    console.log("Opening Kick sign-in…");
+    const result = await authenticateKick();
+    if (Result.isError(result)) printError(result.error);
+    else console.log(`Connected to ${result.value.displayName}.`);
+    return;
+  }
+
   console.log("Opening Twitch sign-in…");
   const result = await authenticateTwitch();
   if (Result.isError(result)) printError(result.error);
@@ -130,14 +154,24 @@ async function authenticateProvider(provider: Provider): Promise<void> {
 
 async function logoutSelected(target: LogoutTarget): Promise<void> {
   if (target === "all") {
-    const [youtubeResult, twitchResult] = await Promise.all([logout(), logoutTwitch()]);
+    const [youtubeResult, twitchResult, kickResult] = await Promise.all([
+      logout(),
+      logoutTwitch(),
+      logoutKick(),
+    ]);
     printLogoutResult("YouTube", youtubeResult);
     printLogoutResult("Twitch", twitchResult);
+    printLogoutResult("Kick", kickResult);
     return;
   }
 
-  const result = target === "youtube" ? await logout() : await logoutTwitch();
-  printLogoutResult(target === "youtube" ? "YouTube" : "Twitch", result);
+  if (target === "youtube") {
+    printLogoutResult("YouTube", await logout());
+  } else if (target === "twitch") {
+    printLogoutResult("Twitch", await logoutTwitch());
+  } else {
+    printLogoutResult("Kick", await logoutKick());
+  }
 }
 
 function printLogoutResult(label: string, result: Awaited<ReturnType<typeof logout>>): void {
@@ -195,5 +229,28 @@ function twitchFeed(credentials: TwitchCredentials): FeedClient {
         credentials.clientId,
         credentials.userId,
       ),
+  };
+}
+
+async function runKick(credentials: KickCredentials): Promise<void> {
+  const token = await kickAccessToken(credentials);
+  if (Result.isError(token)) {
+    printError(token.error);
+    return;
+  }
+  await runTui(token.value, kickFeed(credentials));
+}
+
+function kickFeed(credentials: KickCredentials): FeedClient {
+  return {
+    channelTitle: credentials.displayName,
+    refreshAccessToken: async () => {
+      const current = await loadKickCredentials();
+      return Result.isError(current) ? Result.err(current.error) : kickAccessToken(current.value);
+    },
+    findActiveBroadcast: (token) => findActiveKickBroadcast(token, credentials),
+    loadChatHistory: () => loadKickChatHistory(credentials),
+    openChatStream: (_token, _liveChatId, _pageToken, callbacks) =>
+      openKickChatStream(credentials, callbacks),
   };
 }
