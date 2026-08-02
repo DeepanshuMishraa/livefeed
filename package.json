@@ -1,6 +1,6 @@
 {
   "name": "livefeed",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "YouTube, Twitch, and Kick live chat, native to your terminal.",
   "license": "MIT",
   "repository": {

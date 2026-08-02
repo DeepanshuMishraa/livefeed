@@ -84,8 +84,8 @@ npm run release:patch
 
 The release script increments the version without creating a Git tag, runs every check, builds the
 CLI, and publishes the public npm package with the `latest` tag. Run `npm run release:minor` when
-incrementing the minor version instead. Versions `0.0.3`, `0.0.4`, and `0.0.6` have already been
-used and cannot be republished.
+incrementing the minor version instead. Versions `0.0.1` through `0.0.4` have already been used and
+cannot be republished.
 
 Use `npm run deploy` to publish the exact version already set in `package.json`.
 
