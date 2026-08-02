@@ -1,0 +1,111 @@
+package.json
+  s_22078c58ac9823::t_ea015e848daeb4 4,64
+  s_22078c58ac9823::t_51b1da92ceae63 10
+tests/cli.test.ts
+  s_22078c58ac9823::t_4f8d10d0f6818d 29,31-32
+web/src/pages/terms.astro
+  s_22078c58ac9823::t_e084190f1bd226 35,44-45,63,112
+web/src/pages/privacy.astro
+  s_22078c58ac9823::t_e084190f1bd226 22,34-36,57-62,92,127-128,133-137,153-156,180,186,201-202
+web/src/pages/index.astro
+  s_c1ad5a8279f3d5::t_cda1fb53e72545 505,507-515,519,527,535,537-538
+  s_22078c58ac9823::t_ea015e848daeb4 14,95
+  s_c1ad5a8279f3d5::t_9f8ae2ac25c30e 609-612
+  s_22078c58ac9823::t_9a3a211d7c2780 13,19,32-34,39-40,55,186-187
+web/src/layouts/Layout.astro
+  s_22078c58ac9823::t_ea015e848daeb4 32,40
+src/kick.ts
+  s_22078c58ac9823::t_07e6d7d60bc549 1-2,4-200
+  s_22078c58ac9823::t_207e7bb6806893 3
+server/wrangler.jsonc
+  s_22078c58ac9823::t_5e1ffd3bec1ed8 25-32,78-85
+tests/kick.test.ts
+  s_22078c58ac9823::t_3d17f8bbe94410 38-39
+  s_22078c58ac9823::t_46af491d436a19 1-37,40-61
+server/src/kick-chat-relay.ts
+  s_22078c58ac9823::t_ea015e848daeb4 9,33-36,62
+  s_22078c58ac9823::t_ee9893f199a55e 1-8,10-32,37-61,63-147
+src/provider-selector.ts
+  s_22078c58ac9823::t_4f8d10d0f6818d 23,29-30,38
+README.md
+  s_22078c58ac9823::t_ea015e848daeb4 3,5,34-36,45-47,51-53,73-76
+  s_22078c58ac9823::t_51b1da92ceae63 42
+server/README.md
+  s_22078c58ac9823::t_ea015e848daeb4 3,10-11,14-15,18-23,50-58,64,101-105
+  s_22078c58ac9823::t_e084190f1bd226 82-83
+  s_22078c58ac9823::t_4e0dfdb6a5bb73 106-107
+web/src/components/ProviderSignal.astro
+  s_c1ad5a8279f3d5::t_d5c20af70c602b 1,8-9,13,17,34,53,84-108,112,114,150,162-163,167,217,221,226-230,232-244
+  s_22078c58ac9823::t_9a3a211d7c2780 54-69,131-134,166
+  s_c1ad5a8279f3d5::t_41e4a60d44504c 145
+  s_22078c58ac9823::t_8d74c0d8f08211 135,202
+  s_c1ad5a8279f3d5::t_74f73a64c5d23f 10-12
+  s_22078c58ac9823::t_f2117f81ced38c 3-7,16,83,141,143-144,148-149,193,196
+server/src/kick-webhook.ts
+  s_22078c58ac9823::t_b4042d84880a60 1-161
+src/cli.ts
+  s_22078c58ac9823::t_4f8d10d0f6818d 1,28-31
+server/src/domain.ts
+  s_22078c58ac9823::t_5e1ffd3bec1ed8 7,74
+  s_22078c58ac9823::t_92ec51c87d95a8 75-77
+  s_22078c58ac9823::t_f7aaf74af2b45e 78-79
+server/.dev.vars.example
+  s_22078c58ac9823::t_e084190f1bd226 5-6
+PRIVACY.md
+  s_22078c58ac9823::t_ea015e848daeb4 3-4,11-14,21,25-26
+src/index.tsx
+  s_22078c58ac9823::t_4d6ba02694452e 9-15,35,85,88,102-105,110,125-126,141-148,157-161,164,168-174,234-254,256
+  s_22078c58ac9823::t_b3d93192b92bad 8
+  s_22078c58ac9823::t_e582cc36e93766 255
+server/src/bindings.ts
+  s_22078c58ac9823::t_5e1ffd3bec1ed8 3-4,11-12,16-17
+server/test/worker.test.ts
+  s_22078c58ac9823::t_9b8ce9490bcf41 85-110
+  s_22078c58ac9823::t_7fe5e14db666ac 192-208
+server/src/kick-oauth-session.ts
+  s_22078c58ac9823::t_effb07a4971668 156
+  s_22078c58ac9823::t_3d17f8bbe94410 228-231,295,302-309,316-319
+  s_22078c58ac9823::t_68ad33b60c5e67 1-155,157-227,232-294,296-301,310-315,320-386
+server/src/index.ts
+  s_22078c58ac9823::t_41474f5a55ef7b 34
+  s_22078c58ac9823::t_ecd1bbe6664532 8-9,22-24,28,407-615,667-689
+  s_22078c58ac9823::t_97fdb38a3b8d59 690
+src/errors.ts
+  s_22078c58ac9823::t_5c6e417f078a00 28
+  s_22078c58ac9823::t_4f8d10d0f6818d 29-33,84-93
+tests/kick-auth.test.ts
+  s_22078c58ac9823::t_46af491d436a19 1-99
+src/kick-auth.ts
+  s_22078c58ac9823::t_551622eac6532b 1-77,80-138,141-337
+  s_22078c58ac9823::t_3d17f8bbe94410 78-79,139-140
+server/package.json
+  s_22078c58ac9823::t_104e1fc6325c5a 23-24,27
+server/vitest.config.ts
+  s_22078c58ac9823::t_5e1ffd3bec1ed8 14-15
+server/bun.lock
+  s_22078c58ac9823::t_7737ec2b44386e 13-14,17,44,46,48,50,52,54,56,306,362,364,372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c0d4958dbabb263f37aea3e21a3e5d9920ffa098",
+  "prompts": {},
+  "sessions": {
+    "s_22078c58ac9823": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc0ee-e671-71f1-894b-bd0fa29aad9e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    },
+    "s_c1ad5a8279f3d5": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_03eb85011ffeNkaYh48Z94iU0k",
+        "model": "kimi-k3"
+      },
+      "human_author": "Deepanshu Mishra <d4deepanshu723@gmail.com>"
+    }
+  }
+}
