@@ -19,6 +19,7 @@ type Props = {
 };
 
 const { title, description, heading, summary, effectiveDate, active, sections } = Astro.props;
+const documentCode = active === "privacy" ? "DOC_001" : "DOC_002";
 ---
 
 <Layout title={title} description={description}>
@@ -26,19 +27,24 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 
 	<main id="main-content" class="legal-page">
 		<header class="legal-hero">
-			<p class="document-label">{active === "privacy" ? "Privacy" : "Terms"}</p>
+			<div class="document-meta">
+				<p>{documentCode} · LIVEFEED POLICY</p>
+				<p>Effective {effectiveDate}</p>
+			</div>
 			<h1>{heading}</h1>
 			<p class="summary">{summary}</p>
-			<p class="effective">Effective {effectiveDate}</p>
 		</header>
 
 		<div class="legal-grid">
 			<aside>
-				<p>On this page</p>
+				<p>CONTENTS · {sections.length} SECTIONS</p>
 				<nav aria-label={`${heading} sections`}>
 					{
-						sections.map((section) => (
-							<a href={`#${section.id}`}>{section.label}</a>
+						sections.map((section, index) => (
+							<a href={`#${section.id}`}>
+								<span>{String(index + 1).padStart(2, "0")}</span>
+								{section.label}
+							</a>
 						))
 					}
 				</nav>
@@ -61,69 +67,63 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 	}
 
 	.legal-hero {
-		display: grid;
-		min-height: min(48rem, calc(100dvh - 4rem));
-		grid-template-columns: minmax(9rem, 0.22fr) minmax(0, 1fr) minmax(16rem, 0.36fr);
-		gap: clamp(2rem, 5vw, 6rem);
-		align-items: end;
-		padding: clamp(3rem, 8vh, 7rem) 0 2rem;
-		border-bottom: 1px solid var(--line-strong);
+		padding-block: clamp(3rem, 8vw, 7rem) clamp(4rem, 9vw, 7rem);
+		border-bottom: 1px solid var(--line);
 	}
 
-	.document-label,
-	.effective,
-	aside > p {
-		font-family: var(--font-mono);
-		font-size: 0.66rem;
-		letter-spacing: 0.055em;
+	.document-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		color: var(--accent);
+		font-size: 0.58rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
 	}
 
-	.document-label {
+	.document-meta p {
 		margin: 0;
-		color: var(--accent);
 	}
 
 	h1 {
-		margin: 0 -0.04em 0 0;
-		font-size: clamp(4.5rem, min(10vw, 18vh), 10rem);
-		font-stretch: 65%;
-		font-weight: 760;
-		letter-spacing: -0.06em;
-		line-height: 0.78;
+		max-width: 68rem;
+		margin: clamp(2rem, 6vw, 5rem) 0 2rem;
+		color: var(--accent);
+		font-size: clamp(3.6rem, 9vw, 8rem);
+		font-weight: 700;
+		letter-spacing: -0.075em;
+		line-height: 0.9;
 		text-transform: uppercase;
 	}
 
 	.summary {
-		max-width: 29rem;
+		max-width: 52rem;
 		margin: 0;
-		color: var(--ink-muted);
-		font-size: clamp(1rem, 1.5vw, 1.18rem);
+		color: var(--ink);
+		font-size: clamp(0.95rem, 1.6vw, 1.2rem);
 		line-height: 1.65;
-	}
-
-	.effective {
-		grid-column: 3;
-		margin: 1rem 0 0;
-		color: var(--ink-muted);
 	}
 
 	.legal-grid {
 		display: grid;
-		grid-template-columns: minmax(12rem, 0.3fr) minmax(0, 1fr);
-		gap: 0;
-		padding-bottom: clamp(7rem, 14vw, 13rem);
+		grid-template-columns: minmax(13rem, 0.32fr) minmax(0, 1fr);
+		padding-bottom: clamp(6rem, 12vw, 10rem);
 	}
 
 	aside {
 		align-self: start;
-		padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 5rem) 0 0;
+		padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem) 0 0;
 		border-right: 1px solid var(--line);
 	}
 
 	aside > p {
 		margin: 0 0 1.25rem;
-		color: var(--ink-muted);
+		color: var(--accent);
+		font-size: 0.58rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
 	}
 
 	aside nav {
@@ -132,18 +132,24 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 	}
 
 	aside a {
-		padding-block: 0.72rem;
+		display: grid;
+		grid-template-columns: 2rem 1fr;
+		gap: 0.65rem;
+		padding-block: 0.8rem;
 		border-bottom: 1px solid var(--line);
 		color: var(--ink-muted);
-		font-size: 0.76rem;
+		font-size: 0.66rem;
+		line-height: 1.35;
 		text-decoration: none;
-		transition:
-			color 180ms var(--ease-out),
-			padding-left 180ms var(--ease-out);
+		transition: color 140ms var(--ease-out);
+	}
+
+	aside a span {
+		color: var(--accent);
 	}
 
 	.legal-content {
-		max-width: 49rem;
+		max-width: 52rem;
 		padding: clamp(3rem, 6vw, 5rem) 0 0 clamp(2rem, 6vw, 6rem);
 	}
 
@@ -159,24 +165,25 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 
 	.legal-content :global(h2) {
 		margin: 0 0 1.75rem;
-		font-size: clamp(2rem, 3.5vw, 3.5rem);
-		font-stretch: 78%;
-		font-weight: 620;
-		letter-spacing: -0.035em;
-		line-height: 0.98;
+		font-size: clamp(1.55rem, 3vw, 2.5rem);
+		font-weight: 650;
+		letter-spacing: -0.045em;
+		line-height: 1;
+		text-transform: uppercase;
 	}
 
 	.legal-content :global(h3) {
 		margin: 2.25rem 0 0.8rem;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		font-weight: 650;
+		text-transform: uppercase;
 	}
 
 	.legal-content :global(p),
 	.legal-content :global(li) {
 		color: var(--ink-muted);
-		font-size: 0.94rem;
-		line-height: 1.75;
+		font-size: 0.82rem;
+		line-height: 1.8;
 		text-wrap: pretty;
 	}
 
@@ -193,40 +200,33 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 
 	.legal-content :global(strong) {
 		color: var(--ink);
-		font-weight: 620;
+		font-weight: 650;
 	}
 
 	.legal-content :global(code) {
 		padding: 0.15em 0.35em;
-		color: var(--ink);
-		background: var(--surface-muted);
-		font-family: var(--font-mono);
-		font-size: 0.86em;
+		color: var(--accent);
+		background: var(--surface);
+		font-size: 0.9em;
 	}
 
 	.legal-content :global(a) {
-		color: var(--ink);
-		text-decoration-color: var(--line);
+		color: var(--accent);
+		text-decoration-color: var(--line-strong);
 		text-underline-offset: 0.2em;
 	}
 
 	@media (hover: hover) {
 		aside a:hover {
-			padding-left: 0.35rem;
-			color: var(--ink);
+			color: var(--accent);
 		}
 	}
 
 	@media (max-width: 52rem) {
-		.legal-hero {
-			min-height: auto;
-			grid-template-columns: 1fr;
-			gap: 2rem;
-			padding-block: clamp(4rem, 12vw, 7rem) 2rem;
-		}
-
-		.effective {
-			grid-column: auto;
+		.document-meta {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.5rem;
 		}
 
 		.legal-grid {
@@ -238,12 +238,8 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 			border-right: 0;
 		}
 
-		.legal-content {
-			padding-left: 0;
-		}
-
 		aside nav {
-			grid-template-columns: repeat(2, 1fr);
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 
 		aside a:nth-child(odd) {
@@ -254,13 +250,13 @@ const { title, description, heading, summary, effectiveDate, active, sections } 
 		aside a:nth-child(even) {
 			padding-left: 1rem;
 		}
+
+		.legal-content {
+			padding-left: 0;
+		}
 	}
 
-	@media (max-width: 32rem) {
-		h1 {
-			font-size: clamp(4rem, 22vw, 6rem);
-		}
-
+	@media (max-width: 34rem) {
 		aside nav {
 			grid-template-columns: 1fr;
 		}

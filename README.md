@@ -13,22 +13,27 @@ Requires Bun 1.3 or newer on macOS or desktop Linux.
 bun add --global livefeed
 ```
 
+After installation, run `livefeed update` whenever you want to check for and install a newer
+version.
+
 Or run it directly:
 
 ```sh
-bunx livefeed yt auth
-bunx livefeed yt
+bunx livefeed auth
+bunx livefeed
 ```
 
 ## Use
 
 ```sh
-livefeed yt auth
-livefeed yt
-
-livefeed twitch auth
-livefeed twitch
+livefeed auth
+livefeed
+livefeed logout
 ```
+
+When one provider is connected, `livefeed` opens that chat automatically. When both are connected,
+it shows a compact selector. `livefeed auth` asks which provider to connect. `livefeed logout` lets
+you remove the YouTube login, Twitch login, or both.
 
 Authentication opens in your browser. No stream key, pasted token, or client secret is required.
 
@@ -41,13 +46,10 @@ the same stream.
 
 | Command | Action |
 | --- | --- |
-| `livefeed yt` | Open your active YouTube broadcast's chat |
-| `livefeed yt auth` | Sign in with Google |
-| `livefeed yt logout` | Revoke and remove the saved YouTube login |
-| `livefeed twitch` | Open your active Twitch stream's chat |
-| `livefeed twitch auth` | Sign in with Twitch |
-| `livefeed twitch logout` | Revoke and remove the saved Twitch login |
-| `livefeed` | Alias for `livefeed yt` |
+| `livefeed` | Open the only connected provider or choose between both |
+| `livefeed auth` | Choose YouTube or Twitch and sign in |
+| `livefeed logout` | Remove the YouTube login, Twitch login, or both |
+| `livefeed update` | Check for and install the latest published version |
 
 Use `↑`/`↓` or `j`/`k` to scroll, `G` to jump to the latest message, and `q` to quit. Set `NO_COLOR=1` to disable color.
 
@@ -55,9 +57,9 @@ Use `↑`/`↓` or `j`/`k` to scroll, `G` to jump to the latest message, and `q`
 
 ```sh
 bun install
-bun run src/index.tsx twitch auth
-bun run src/index.tsx twitch
-bun run src/index.tsx yt
+bun run src/index.tsx auth
+bun run src/index.tsx
+bun run src/index.tsx logout
 ```
 
 ```sh
@@ -79,8 +81,8 @@ npm run release:patch
 
 The release script increments the version without creating a Git tag, runs every check, builds the
 CLI, and publishes the public npm package with the `latest` tag. Run `npm run release:minor` when
-incrementing the minor version instead. The next releases should be `0.0.2`, then `0.1.0`; versions
-`0.0.3`, `0.0.4`, and `0.0.6` have already been used and cannot be republished.
+incrementing the minor version instead. Versions `0.0.3`, `0.0.4`, and `0.0.6` have already been
+used and cannot be republished.
 
 Use `npm run deploy` to publish the exact version already set in `package.json`.
 

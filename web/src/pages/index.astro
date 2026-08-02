@@ -1,5 +1,7 @@
 ---
 import Command from "../components/Command.astro";
+import InstallCommands from "../components/InstallCommands.astro";
+import ProviderSignal from "../components/ProviderSignal.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import TerminalPreview from "../components/TerminalPreview.astro";
@@ -7,138 +9,184 @@ import Layout from "../layouts/Layout.astro";
 import packageJson from "../../../package.json";
 
 const commands = [
-  { command: "livefeed yt auth", description: "Authorize read-only YouTube access" },
-  { command: "livefeed yt", description: "Follow the current YouTube live chat" },
-  { command: "livefeed twitch auth", description: "Authorize Twitch chat access" },
-  { command: "livefeed twitch", description: "Follow the current Twitch live chat" },
+  { command: "livefeed", description: "Open the connected chat or choose a provider" },
+  { command: "livefeed auth", description: "Choose YouTube or Twitch and connect" },
+  { command: "livefeed logout", description: "Remove one login or sign out of both" },
+  { command: "livefeed update", description: "Install the latest published version" },
 ] as const;
 
-const behavior = [
+const statusRows = [
+  { label: "Providers", value: "2 / 2", measure: "100%" },
+  { label: "Write access", value: "0", measure: "0%" },
+  { label: "Local history", value: "2,000", measure: "82%" },
+  { label: "Analytics", value: "none", measure: "0%" },
+] as const;
+
+const authFacts = [
   [
-    "Stream discovery",
-    "Finds the broadcast that is live now. Public, unlisted, and private YouTube streams work.",
+    "AUTH_001",
+    "YouTube",
+    "Finds public, unlisted, and private live broadcasts with read-only access.",
   ],
-  [
-    "Waiting offline",
-    "Can start before the stream. It checks again and connects without a restart.",
-  ],
-  ["Chat history", "Loads available YouTube chat history before following new messages."],
-  ["Reconnection", "Reports network loss, reconnects, and preserves messages already received."],
-  [
-    "Responsive layout",
-    "Reflows with the terminal and keeps the newest message anchored at the bottom.",
-  ],
+  ["AUTH_002", "Twitch", "Uses user:read:chat to receive your channel's live conversation."],
+  ["AUTH_003", "Credentials", "Refresh tokens stay in the operating system credential manager."],
+  ["AUTH_004", "Chat data", "Messages remain in process memory and are discarded on exit."],
 ] as const;
 ---
 
 <Layout
-	title="Livefeed — YouTube and Twitch live chat in your terminal"
+	title="Livefeed | YouTube and Twitch live chat in your terminal"
 	description="Livefeed is a read-only CLI that finds your active YouTube or Twitch stream and displays its live chat in the terminal."
 >
 	<SiteHeader />
 
 	<main id="main-content">
-    <section class="masthead" id="product" aria-labelledby="hero-title">
-      <div class="hero-intro">
-        <p class="coordinate"><span aria-hidden="true"></span>YouTube + Twitch</p>
-        <h1 id="hero-title">
-          <span>LIVE</span>
-          <span>CHAT</span>
-        </h1>
-        <p class="hero-copy">
-          Livefeed is a read-only command-line app for viewing YouTube and Twitch live chat in your
-          terminal. It finds the active stream, loads recent messages, waits when you are offline,
-          and reconnects without losing the conversation.
-        </p>
-       <div class="hero-install">
-          <p>Install with Bun · v{packageJson.version}</p>
-          <Command command="bun add --global livefeed" label="Copy install command" large />
-        </div>
-      </div>
+		<section class="hero" id="product" aria-labelledby="hero-title">
+			<div class="figure-meta">
+				<p>OPEN SOURCE · MIT</p>
+			</div>
 
-      <div class="hero-preview">
-        <TerminalPreview />
-      </div>
-    </section>
+			<h1 id="hero-title">LIVE CHAT<br />FROM TERMINAL</h1>
 
-		<div class="manual" id="manual">
-			<section class="manual-section" aria-labelledby="name-title">
-				<div class="section-rail">
-					<h2 id="name-title">About</h2>
+			<div class="hero-summary">
+				<div>
+					<p class="hero-thesis">
+						YouTube and Twitch chat, kept beside the code instead of behind another browser
+						window.
+					</p>
+					<p class="hero-note">
+						Read-only. Automatic stream discovery. Built to stay open on your own machine.
+					</p>
 				</div>
-				<div class="manual-body name-body">
-					<p class="definition">
-						<strong>Livefeed</strong> — a read-only live chat client for streamers who work
-						from the terminal.
+				<div class="hero-actions">
+					<a class="primary-action" href="#install">Install Livefeed</a>
+					<a href="https://github.com/DeepanshuMishraa/livefeed">View source</a>
+				</div>
+			</div>
+		</section>
+
+		<section class="product-figure" aria-labelledby="preview-title">
+			<header class="section-caption">
+				<p id="preview-title">FIG_001 · LIVE TERMINAL FEED</p>
+				<p>Newest messages remain anchored at the bottom</p>
+			</header>
+			<div class="figure-stage">
+				<div class="chat-panel">
+					<TerminalPreview />
+				</div>
+				<ProviderSignal />
+			</div>
+		</section>
+
+		<section class="editorial-section" aria-labelledby="how-title">
+			<div class="section-label">
+				<p>HOW THIS WORKS</p>
+			</div>
+			<div class="editorial-copy">
+				<h2 id="how-title">One command. The active conversation.</h2>
+				<p class="lead">
+					Livefeed checks which provider is connected, finds the broadcast that is live now,
+					and opens its chat in a responsive terminal feed.
+				</p>
+				<div class="copy-columns">
+					<p>
+						Start it before going live. It waits offline, checks again, and connects without a
+						restart. If YouTube and Twitch are both connected, a compact shell prompt asks
+						which chat to open.
 					</p>
 					<p>
-						No stream key. No provider secret in the package. No browser window left open
-						beside the stream.
+						YouTube history loads before new messages arrive. Twitch history is restored from
+						the local machine. Network loss is reported, retries are automatic, and messages
+						already received stay visible.
 					</p>
 				</div>
-			</section>
-
-			<section class="manual-section" id="commands" aria-labelledby="synopsis-title">
-				<div class="section-rail">
-					<h2 id="synopsis-title">Commands</h2>
-				</div>
-				<div class="manual-body command-list">
-					{
-						commands.map((item) => (
-							<div class="command-row">
-								<Command command={item.command} />
-								<p>{item.description}</p>
-							</div>
-						))
-					}
-				</div>
-			</section>
-
-			<section class="manual-section" aria-labelledby="behavior-title">
-				<div class="section-rail">
-					<h2 id="behavior-title">Behavior</h2>
-				</div>
-				<dl class="manual-body behavior-list">
-					{
-						behavior.map(([term, description]) => (
-							<div>
-								<dt>{term}</dt>
-								<dd>{description}</dd>
-							</div>
-						))
-					}
-				</dl>
-			</section>
-
-			<section class="manual-section" aria-labelledby="auth-title">
-				<div class="section-rail">
-					<h2 id="auth-title">Authentication</h2>
-				</div>
-				<div class="manual-body auth-body">
-					<p class="definition">
-						Authorization opens in the browser. The CLI receives the result and stores the
-						refresh token in the operating system credential manager.
-					</p>
-					<div class="auth-facts">
-						<p>
-							<span>YouTube</span> Identifies your channel, finds its active broadcast, and
-							reads live chat. It cannot modify your channel or stream.
-						</p>
-						<p><span>Twitch</span> <code>user:read:chat</code> only.</p>
-						<p><span>Authentication server</span> OAuth sessions expire after five minutes.</p>
-						<p><span>Chat data</span> Kept in process memory; discarded on exit.</p>
-					</div>
-					<a href="/privacy">Read the privacy policy</a>
-				</div>
-			</section>
-		</div>
-
-		<section class="end-block" aria-labelledby="end-title">
-			<div>
-				<p>Install</p>
-				<h2 id="end-title">Install Livefeed.</h2>
 			</div>
-			<Command command="bun add --global livefeed" label="Copy install command" large />
+		</section>
+
+		<section class="status-section" aria-labelledby="status-title">
+			<h2 id="status-title">Operational profile</h2>
+			<div class="status-list">
+				{
+					statusRows.map((row) => (
+						<div class="status-row">
+							<p>{row.label}</p>
+							<div class="status-track" aria-hidden="true">
+								<span style={`--measure: ${row.measure}`}></span>
+							</div>
+							<p>{row.value}</p>
+						</div>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="catalog" id="commands" aria-labelledby="commands-title">
+			<header class="catalog-heading">
+				<p>COMMAND CATALOG · {commands.length} ENTRIES</p>
+				<h2 id="commands-title">Run the feed</h2>
+				<p>Copy a command or run the default. Provider-specific commands remain available.</p>
+			</header>
+
+			<div class="catalog-rows">
+				{
+					commands.map((item, index) => (
+						<div class="catalog-row">
+							<span class="row-index">{index}.</span>
+							<span class="row-marker" aria-hidden="true"></span>
+							<Command command={item.command} />
+							<p>{item.description}</p>
+							<span class="row-code">0{index}</span>
+						</div>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="install-section" id="install" aria-labelledby="install-title">
+			<div class="section-label">
+				<p>INSTALL · THREE PACKAGE MANAGERS</p>
+			</div>
+			<div class="install-content">
+				<h2 id="install-title">Install once. Run anywhere Bun runs.</h2>
+				<p>
+					Use npm, pnpm, or Bun to install the public package globally. Bun 1.3 or newer is
+					required as the runtime on macOS or desktop Linux.
+				</p>
+				<InstallCommands id="main-install" version={packageJson.version} />
+			</div>
+		</section>
+
+		<section class="auth-section" aria-labelledby="auth-title">
+			<header class="catalog-heading">
+				<p>AUTHORIZATION · READ ONLY</p>
+				<h2 id="auth-title">Access with strict boundaries</h2>
+				<p>Browser authorization completes once. Provider secrets never ship in the CLI.</p>
+			</header>
+			<div class="auth-grid">
+				{
+					authFacts.map(([index, title, description]) => (
+						<article>
+							<p>{index}</p>
+							<h3>{title}</h3>
+							<p>{description}</p>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="colophon" aria-labelledby="colophon-title">
+			<div class="section-label">
+				<p>COLOPHON</p>
+			</div>
+			<div>
+				<h2 id="colophon-title">Your stream stays yours.</h2>
+				<p>
+					No analytics. No advertising. No chat relay. The source is public, the license is
+					MIT, and the feed runs locally.
+				</p>
+				<Command command="livefeed" label="Copy launch command" large />
+			</div>
 		</section>
 	</main>
 
@@ -149,378 +197,435 @@ const behavior = [
 	main {
 		width: min(100%, var(--page-width));
 		margin-inline: auto;
+		padding-inline: var(--page-gutter);
 	}
 
-  .masthead,
-  .manual-section,
-  .end-block {
-    padding-inline: var(--page-gutter);
-  }
-
-  .masthead {
-    display: grid;
-    grid-template-columns: minmax(24rem, 0.76fr) minmax(38rem, 1.35fr);
-    gap: clamp(3rem, 5vw, 6rem);
-    align-items: stretch;
-    padding-top: clamp(2.75rem, 3vw, 3.75rem);
-    padding-bottom: clamp(4.5rem, 7vw, 7.5rem);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .hero-intro {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-  }
-
-  h1 {
-    margin: clamp(1.75rem, 3vw, 3rem) 0 clamp(2rem, 4vw, 3.5rem);
-    font-size: clamp(7rem, 12vw, 13rem);
-    font-stretch: 62%;
-    font-weight: 760;
-    letter-spacing: -0.07em;
-    line-height: 0.72;
-  }
-
-  h1 span {
-    display: block;
-  }
-
-  h1 span:last-child {
-    margin-top: 0.08em;
-    color: transparent;
-    -webkit-text-stroke: 1px var(--line-strong);
-  }
-
-  .coordinate,
-  .hero-install > p,
-	.section-rail,
-	.end-block > div > p {
-		font-family: var(--font-mono);
-		font-size: 0.64rem;
-		letter-spacing: 0.07em;
-	}
-
-  .coordinate {
-    display: inline-flex;
-    width: fit-content;
-    min-height: 2rem;
-    align-items: center;
-    gap: 0.65rem;
-    margin: 0 0 1.5rem;
-    padding: 0.45rem 0.7rem;
-    border: 1px solid var(--line-strong);
-    color: var(--accent);
-    background: var(--surface);
-    text-transform: uppercase;
-  }
-
-  .coordinate span {
-    width: 0.38rem;
-    height: 0.38rem;
-    margin-right: 0.48rem;
-    background: var(--accent);
-    box-shadow: 0.52rem 0 0 var(--line-strong);
-  }
-
-  .hero-copy {
-    max-width: 28rem;
-    margin: 0;
-    color: var(--ink-muted);
-    font-size: clamp(0.92rem, 1.2vw, 1.08rem);
-    line-height: 1.6;
-    text-wrap: pretty;
-  }
-
-  .access-copy {
-    max-width: 28rem;
-    margin: 1rem 0 0;
-    color: var(--ink-muted);
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    line-height: 1.6;
-    text-wrap: pretty;
-  }
-
-  .hero-install {
-    width: 100%;
-    min-width: 0;
-    margin-top: auto;
-    padding-top: clamp(3rem, 6vw, 5rem);
-  }
-
-	.hero-install > p {
-		margin: 0 0 0.75rem;
-		color: var(--ink-muted);
-	}
-
-  .manual-section {
-    display: grid;
-    grid-template-columns: minmax(10rem, 0.22fr) minmax(0, 1fr);
-  }
-
-	.section-rail {
-		padding-right: 2rem;
-		color: var(--ink-muted);
-	}
-
-	.section-rail h2 {
-		margin: 0;
-		font-family: inherit;
-		font-size: inherit;
-		font-weight: 500;
-		letter-spacing: inherit;
-	}
-
-  .hero-preview {
-    min-width: 0;
-    align-self: start;
-    margin-top: calc(3.5rem + clamp(1.75rem, 3vw, 3rem));
-    border-block: 1px solid var(--line);
-  }
-
-	.manual-section {
+	.hero {
+		padding-block: clamp(2.25rem, 6vw, 5.5rem) clamp(4rem, 9vw, 7.5rem);
 		border-bottom: 1px solid var(--line);
 	}
 
-	.manual-section .section-rail,
-	.manual-body {
-		padding-top: clamp(3rem, 6vw, 6rem);
-		padding-bottom: clamp(4rem, 8vw, 8rem);
+	.figure-meta,
+	.section-caption,
+	.launch-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.5rem;
+		color: var(--accent);
+		font-size: 0.58rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
 	}
 
-	.manual-body {
-		border-left: 1px solid var(--line);
-		padding-left: clamp(1.5rem, 4vw, 4rem);
+	.figure-meta {
+		justify-content: flex-end;
 	}
 
-	.name-body {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.35fr);
-		gap: clamp(3rem, 8vw, 9rem);
-	}
-
-	.definition {
-		max-width: 50rem;
+	.figure-meta p,
+	.section-caption p {
 		margin: 0;
-		font-size: clamp(1.8rem, 4vw, 4rem);
-		font-stretch: 80%;
-		font-weight: 430;
-		letter-spacing: -0.035em;
-		line-height: 1.08;
 	}
 
-	.name-body > p:last-child,
-	.command-row > p,
-	.behavior-list dd,
-	.auth-facts p {
+	h1 {
+		max-width: 64rem;
+		margin: clamp(2rem, 6vw, 5rem) 0 clamp(2rem, 5vw, 4rem);
+		color: var(--accent);
+		font-size: clamp(4rem, 9vw, 8rem);
+		font-weight: 700;
+		letter-spacing: -0.075em;
+		line-height: 0.88;
+		text-transform: uppercase;
+	}
+
+	.hero-summary {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: clamp(2rem, 6vw, 6rem);
+		align-items: end;
+	}
+
+	.hero-thesis {
+		max-width: 48rem;
+		margin: 0 0 0.75rem;
+		color: var(--ink);
+		font-size: clamp(1rem, 1.7vw, 1.3rem);
+		line-height: 1.55;
+	}
+
+	.hero-note {
+		margin: 0;
 		color: var(--ink-muted);
-		font-size: 0.82rem;
+		font-size: 0.72rem;
+		font-style: italic;
+		line-height: 1.6;
+	}
+
+	.hero-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.hero-actions a {
+		display: inline-flex;
+		min-height: 2.8rem;
+		align-items: center;
+		justify-content: center;
+		padding-inline: 1rem;
+		border: 1px solid var(--accent);
+		color: var(--accent);
+		font-size: 0.66rem;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		text-decoration: none;
+		text-transform: uppercase;
+		transition:
+			color 140ms var(--ease-out),
+			background-color 140ms var(--ease-out);
+	}
+
+	.hero-actions .primary-action {
+		color: var(--canvas);
+		background: var(--accent);
+	}
+
+	.product-figure {
+		padding-block: clamp(2.5rem, 6vw, 5rem);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.section-caption {
+		padding-bottom: 1rem;
+	}
+
+	.section-caption p:last-child {
+		color: var(--ink-muted);
+		font-weight: 400;
+	}
+
+	.figure-stage {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) clamp(18rem, 30vw, 24rem);
+	}
+
+	.chat-panel {
+		min-width: 0;
+	}
+
+	.product-figure :global(.terminal) {
+		min-height: clamp(26rem, 52vw, 37rem);
+		padding: clamp(1rem, 3vw, 2rem) 0 0;
+		font-size: clamp(0.75rem, 1.25vw, 0.95rem);
+	}
+
+	.editorial-section,
+	.install-section,
+	.colophon {
+		display: grid;
+		grid-template-columns: minmax(9rem, 0.28fr) minmax(0, 1fr);
+		gap: clamp(2rem, 6vw, 6rem);
+		padding-block: clamp(4rem, 9vw, 7.5rem);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.section-label p,
+	.catalog-heading > p:first-child,
+	.status-section > h2 {
+		margin: 0;
+		color: var(--accent);
+		font-size: 0.58rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.editorial-copy h2,
+	.install-content h2,
+	.catalog-heading h2,
+	.colophon h2 {
+		margin: 0 0 1.5rem;
+		font-size: clamp(1.8rem, 4vw, 3.6rem);
+		font-weight: 650;
+		letter-spacing: -0.055em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.editorial-copy .lead {
+		max-width: 48rem;
+		margin: 0 0 clamp(2rem, 5vw, 4rem);
+		color: var(--ink);
+		font-size: clamp(1rem, 1.6vw, 1.25rem);
 		line-height: 1.65;
 	}
 
-	.name-body > p:last-child {
+	.copy-columns {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		border-top: 1px solid var(--line);
+	}
+
+	.copy-columns p {
 		margin: 0;
+		padding: 1.5rem 1.5rem 0 0;
+		color: var(--ink-muted);
+		font-size: 0.82rem;
+		line-height: 1.75;
 	}
 
-	.command-list {
-		display: grid;
+	.copy-columns p + p {
+		padding-left: 1.5rem;
+		border-left: 1px solid var(--line);
 	}
 
-	.command-row {
+	.status-section {
 		display: grid;
-		grid-template-columns: minmax(18rem, 0.8fr) 1fr;
-		gap: clamp(2rem, 6vw, 7rem);
+		grid-template-columns: minmax(9rem, 0.28fr) minmax(0, 1fr);
+		gap: clamp(2rem, 6vw, 6rem);
+		padding-block: clamp(3rem, 7vw, 5.5rem);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.status-list {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.status-row {
+		display: grid;
+		grid-template-columns: minmax(8rem, 0.3fr) minmax(10rem, 1fr) 5rem;
+		gap: 1.5rem;
 		align-items: center;
-		padding-block: 1rem;
-		border-top: 1px solid var(--line);
-	}
-
-	.command-row:last-child {
-		border-bottom: 1px solid var(--line);
-	}
-
-	.command-row > p {
-		margin: 0;
-	}
-
-	.behavior-list {
-		margin: 0;
-	}
-
-	.behavior-list div {
-		display: grid;
-		grid-template-columns: minmax(8rem, 0.25fr) 1fr;
-		gap: 2rem;
-		padding-block: 1.25rem;
-		border-top: 1px solid var(--line);
-	}
-
-	.behavior-list div:last-child {
-		border-bottom: 1px solid var(--line);
-	}
-
-	.behavior-list dt,
-	.auth-facts span {
-		font-family: var(--font-mono);
 		font-size: 0.66rem;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
 	}
 
-	.behavior-list dd {
-		max-width: 48rem;
+	.status-row p {
 		margin: 0;
 	}
 
-	.auth-body .definition {
-		margin-bottom: clamp(3rem, 7vw, 6rem);
+	.status-row p:last-child {
+		text-align: right;
 	}
 
-	.auth-facts {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		border-top: 1px solid var(--line);
+	.status-track {
+		height: 0.65rem;
+		background: var(--surface-muted);
 	}
 
-	.auth-facts p {
-		margin: 0;
-		padding: 1.25rem 1.25rem 1.25rem 0;
-		border-bottom: 1px solid var(--line);
-	}
-
-	.auth-facts p:nth-child(odd) {
-		border-right: 1px solid var(--line);
-	}
-
-	.auth-facts p:nth-child(even) {
-		padding-left: 1.25rem;
-	}
-
-	.auth-facts span {
+	.status-track span {
 		display: block;
-		margin-bottom: 0.65rem;
-		color: var(--ink);
+		width: var(--measure);
+		height: 100%;
+		background: var(--accent);
 	}
 
-	.auth-body > a {
-		display: inline-block;
-		margin-top: 3rem;
-		color: var(--accent);
-		font-family: var(--font-mono);
-		font-size: 0.66rem;
-		letter-spacing: 0.06em;
-		text-decoration: none;
+	.catalog,
+	.auth-section {
+		padding-block: clamp(4rem, 9vw, 7.5rem);
+		border-bottom: 1px solid var(--line);
 	}
 
-	.end-block {
-		display: grid;
-		grid-template-columns: 1fr minmax(20rem, 0.7fr);
-		gap: clamp(3rem, 8vw, 9rem);
-		align-items: end;
-		padding-top: clamp(5rem, 10vw, 10rem);
-		padding-bottom: clamp(5rem, 10vw, 10rem);
+	.catalog-heading {
+		margin-bottom: clamp(2.5rem, 6vw, 5rem);
 	}
 
-	.end-block > div > p {
-		margin: 0 0 1.5rem;
-		color: var(--accent);
+	.catalog-heading h2 {
+		margin-top: 1rem;
 	}
 
-	.end-block h2 {
+	.catalog-heading > p:last-child,
+	.install-content > p,
+	.colophon > div:last-child > p {
+		max-width: 52rem;
 		margin: 0;
-		font-size: clamp(3.5rem, 8vw, 8rem);
-		font-stretch: 67%;
-		font-weight: 750;
-		letter-spacing: -0.055em;
-		line-height: 0.82;
+		color: var(--ink-muted);
+		font-size: 0.82rem;
+		line-height: 1.7;
 	}
 
-  @media (max-width: 68rem) {
-    .masthead {
-      grid-template-columns: minmax(18rem, 0.68fr) minmax(28rem, 1fr);
-      gap: clamp(2rem, 4vw, 3rem);
-    }
+	.catalog-rows {
+		border-top: 1px solid var(--line);
+	}
 
-    h1 {
-      font-size: clamp(6rem, 12vw, 9rem);
-    }
+	.catalog-row {
+		display: grid;
+		grid-template-columns: 2.2rem 0.6rem minmax(18rem, 0.75fr) minmax(13rem, 1fr) 2rem;
+		gap: 1rem;
+		align-items: center;
+		min-height: 5rem;
+		border-bottom: 1px solid var(--line);
+	}
 
-    .manual-section {
-      grid-template-columns: minmax(7rem, 0.18fr) minmax(0, 1fr);
+	.row-index,
+	.row-code {
+		color: var(--accent);
+		font-size: 0.62rem;
+	}
+
+	.row-code {
+		color: var(--ink-muted);
+		text-align: right;
+	}
+
+	.row-marker {
+		width: 0.5rem;
+		height: 0.5rem;
+		background: var(--accent);
+	}
+
+	.catalog-row > p {
+		margin: 0;
+		color: var(--ink-muted);
+		font-size: 0.72rem;
+		line-height: 1.55;
+	}
+
+	.catalog-row :global(.command) {
+		border: 0;
+		background: transparent;
+	}
+
+	.install-content > p {
+		margin-bottom: 2rem;
+	}
+
+	.auth-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		border-top: 1px solid var(--line);
+		border-left: 1px solid var(--line);
+	}
+
+	.auth-grid article {
+		min-height: 13rem;
+		padding: clamp(1.25rem, 3vw, 2rem);
+		border-right: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
+		background: var(--surface);
+	}
+
+	.auth-grid article > p:first-child {
+		margin: 0 0 2.5rem;
+		color: var(--accent);
+		font-size: 0.58rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+	}
+
+	.auth-grid h3 {
+		margin: 0 0 0.75rem;
+		font-size: 0.82rem;
+		font-weight: 650;
+		text-transform: uppercase;
+	}
+
+	.auth-grid article > p:last-child {
+		margin: 0;
+		color: var(--ink-muted);
+		font-size: 0.72rem;
+		line-height: 1.65;
+	}
+
+	.colophon {
+		border-bottom: 0;
+	}
+
+	.colophon > div:last-child > p {
+		margin-bottom: 1.5rem;
+	}
+
+	.colophon :global(.command) {
+		background: var(--surface);
+	}
+
+	@media (hover: hover) {
+		.hero-actions a:hover {
+			color: var(--canvas);
+			background: var(--accent-dark);
 		}
+	}
 
-		.name-body,
-		.end-block {
+	@media (max-width: 52rem) {
+		.hero-summary,
+		.editorial-section,
+		.install-section,
+		.status-section,
+		.colophon {
 			grid-template-columns: 1fr;
 		}
+
+		.hero-actions {
+			justify-content: flex-start;
+		}
+
+		.catalog-row {
+			grid-template-columns: 2rem 0.5rem minmax(0, 1fr) 2rem;
+			padding-block: 0.75rem;
+		}
+
+		.catalog-row > p {
+			grid-column: 3 / 4;
+		}
 	}
 
-  @media (max-width: 45rem) {
-    .masthead {
-      grid-template-columns: 1fr;
-      gap: 3rem;
-      padding-top: clamp(2.5rem, 7vw, 3.25rem);
-    }
-
-    .hero-install {
-      margin-top: 0;
-      padding-top: 2.5rem;
-    }
-
-    .hero-preview {
-      margin-top: 0;
-    }
-
-    h1 {
-      font-size: clamp(6rem, 30vw, 10rem);
-    }
-
-    .manual-section {
-      grid-template-columns: 1fr;
+	@media (max-width: 38rem) {
+		.figure-stage {
+			grid-template-columns: 1fr;
 		}
 
-		.section-rail {
-			display: flex;
-			gap: 1rem;
-			padding: 1rem 0;
-			border-bottom: 1px solid var(--line);
+		.figure-meta,
+		.section-caption {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.5rem;
 		}
 
-		.manual-body {
+		h1 {
+			font-size: clamp(3.2rem, 15vw, 5rem);
+		}
+
+		.hero-actions {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.copy-columns,
+		.auth-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.copy-columns p + p {
 			padding-left: 0;
 			border-left: 0;
 		}
 
-		.command-row {
-			grid-template-columns: 1fr;
-			gap: 0.75rem;
+		.status-row {
+			grid-template-columns: 1fr 4rem;
+			gap: 0.65rem 1rem;
 		}
 
-		.auth-facts {
-			grid-template-columns: 1fr;
+		.status-track {
+			grid-column: 1 / -1;
+			grid-row: 2;
 		}
 
-		.auth-facts p:nth-child(odd) {
-			border-right: 0;
+		.catalog-row {
+			grid-template-columns: 1.5rem 0.45rem minmax(0, 1fr);
+			gap: 0.65rem;
 		}
 
-		.auth-facts p:nth-child(even) {
-			padding-left: 0;
-		}
-	}
-
-  @media (max-width: 28rem) {
-    h1 {
-      font-size: clamp(5rem, 29vw, 7.5rem);
-    }
-
-		.behavior-list div {
-			grid-template-columns: 1fr;
-			gap: 0.75rem;
+		.row-code {
+			display: none;
 		}
 
-		.end-block h2 {
-			font-size: clamp(3.2rem, 17vw, 5rem);
+		.catalog-row :global(.command),
+		.catalog-row > p {
+			grid-column: 3;
 		}
 	}
 </style>

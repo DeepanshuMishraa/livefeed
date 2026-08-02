@@ -11,7 +11,7 @@ type Props = {
 const { href, label, icon, iconOnly = false } = Astro.props;
 ---
 
-<a href={href} aria-label={label}>
+<a href={href} aria-label={label} class:list={{ "icon-only": iconOnly }}>
 	{
 		icon === "github" && (
 			<svg aria-hidden="true" viewBox="0 0 24 24">
@@ -41,6 +41,13 @@ const { href, label, icon, iconOnly = false } = Astro.props;
 		font-size: 0.76rem;
 		text-decoration: none;
 		transition: color 140ms var(--ease-out);
+	}
+
+	.icon-only {
+		width: 2.25rem;
+		min-height: 2.25rem;
+		justify-content: center;
+		border: 1px solid var(--line);
 	}
 
 	svg {

@@ -3,6 +3,12 @@ import { LivefeedError } from "../src/errors";
 import { retryDelaySeconds } from "../src/youtube";
 
 describe("error messages", () => {
+  it("explains how to connect a provider when no login exists", () => {
+    expect(LivefeedError.message({ _tag: "NoAuthenticatedProvider" })).toBe(
+      "No saved login found. Run `livefeed auth`, connect a provider, then try `livefeed` again.",
+    );
+  });
+
   it("gives a recovery action and preservation guarantee for disconnects", () => {
     const message = LivefeedError.message({ _tag: "NetworkUnavailable", reason: "offline" });
     expect(message).toContain("Existing messages are preserved");

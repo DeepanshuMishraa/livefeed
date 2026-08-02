@@ -17,7 +17,7 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="description" content={description} />
 		<meta name="robots" content={robots} />
-		<meta name="theme-color" content="#f4f3ee" />
+		<meta name="theme-color" content="#fafaf5" />
 		<link rel="canonical" href={canonicalUrl} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
@@ -29,7 +29,7 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 		<meta property="og:image:height" content="630" />
 		<meta
 			property="og:image:alt"
-			content="Livefeed — YouTube and Twitch chat in your terminal"
+			content="Livefeed | YouTube and Twitch chat in your terminal"
 		/>
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
@@ -37,7 +37,7 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 		<meta name="twitter:image" content={socialImageUrl} />
 		<meta
 			name="twitter:image:alt"
-			content="Livefeed — YouTube and Twitch chat in your terminal"
+			content="Livefeed | YouTube and Twitch chat in your terminal"
 		/>
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
 		<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
@@ -45,7 +45,7 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:wght@300..700&display=swap"
 			rel="stylesheet"
 		/>
 		<meta name="generator" content={Astro.generator} />
@@ -73,23 +73,24 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 
 <style is:global>
 	:root {
-		--canvas: #f4f3ee;
-		--surface: #eeece5;
-		--surface-muted: #e4e1d8;
-		--ink: #161714;
-		--ink-muted: #65665f;
-		--line: #d1cfc6;
-		--line-strong: #96968e;
-		--accent: oklch(52% 0.14 145);
-		--accent-dark: oklch(44% 0.13 145);
+		--canvas: #fafaf5;
+		--surface: #f0eee3;
+		--surface-muted: #e8e5d8;
+		--ink: #252525;
+		--ink-muted: #73736e;
+		--line: #d9d8d0;
+		--line-strong: #a7a69e;
+		--grid-dot: rgb(53 83 255 / 12%);
+		--accent: #3553ff;
+		--accent-dark: #263fd4;
 		--terminal: var(--canvas);
 		--terminal-muted: var(--ink-muted);
 		--terminal-line: var(--line);
-		--font-sans: "Archivo", "Helvetica Neue", sans-serif;
-		--font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+		--font-sans: "Spline Sans Mono", "SFMono-Regular", Consolas, monospace;
+		--font-mono: "Spline Sans Mono", "SFMono-Regular", Consolas, monospace;
 		--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 		--page-gutter: clamp(1rem, 3vw, 3rem);
-		--page-width: 100rem;
+		--page-width: 78rem;
 		font-family: var(--font-sans);
 		color: var(--ink);
 		background: var(--canvas);
@@ -99,15 +100,16 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 
 	:root[data-theme="dark"] {
 		color-scheme: dark;
-		--canvas: #000000;
-		--surface: #050505;
-		--surface-muted: #0d0d0d;
-		--ink: #eeeeea;
-		--ink-muted: #92928c;
-		--line: #242424;
-		--line-strong: #555555;
-		--accent: oklch(77% 0.14 145);
-		--accent-dark: oklch(67% 0.13 145);
+		--canvas: #11120f;
+		--surface: #1b1c18;
+		--surface-muted: #24251f;
+		--ink: #efeee7;
+		--ink-muted: #9b9a92;
+		--line: #32332d;
+		--line-strong: #5b5c54;
+		--grid-dot: rgb(111 133 255 / 14%);
+		--accent: #7187ff;
+		--accent-dark: #5870f2;
 	}
 
 	:root[data-theme="light"] {
@@ -131,7 +133,9 @@ const socialImageUrl = new URL("/og-livefeed.png", canonicalUrl);
 	body {
 		min-width: 20rem;
 		margin: 0;
-		background: var(--canvas);
+		background-color: var(--canvas);
+		background-image: radial-gradient(circle, var(--grid-dot) 0.65px, transparent 0.75px);
+		background-size: 10px 10px;
 		-webkit-font-smoothing: antialiased;
 	}
 

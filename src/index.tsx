@@ -1,10 +1,16 @@
 #!/usr/bin/env bun
 import { Result } from "better-result";
 import packageJson from "../package.json" with { type: "json" };
-import { accessToken, authenticate, loadCredentials, logout } from "./auth";
-import { parseCommand } from "./cli";
+import { accessToken, authenticate, type Credentials, loadCredentials, logout } from "./auth";
+import { automaticProvider, type Provider, parseCommand } from "./cli";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import type { FeedClient } from "./feed";
+import {
+  type LogoutTarget,
+  selectAuthProvider,
+  selectLogoutTarget,
+  selectProvider,
+} from "./provider-selector";
 import { runTui } from "./tui";
 import { findActiveTwitchBroadcast, loadTwitchChatHistory, openTwitchChatStream } from "./twitch";
 import {
@@ -15,18 +21,16 @@ import {
   twitchAccessToken,
 } from "./twitch-auth";
 import { findActiveBroadcast, loadChatHistory, openChatStream } from "./youtube";
+import { UpdateError, updateLivefeed } from "./update";
 
 const VERSION = packageJson.version;
 const HELP = `livefeed — YouTube and Twitch live chat, in the terminal
 
 Usage:
-  livefeed yt                 Open your YouTube live chat
-  livefeed yt auth            Sign in with Google
-  livefeed yt logout          Remove the saved YouTube login
-  livefeed twitch             Open your Twitch live chat
-  livefeed twitch auth        Sign in with Twitch
-  livefeed twitch logout      Remove the saved Twitch login
-  livefeed                    Alias for livefeed yt
+  livefeed                    Open the connected chat or choose a provider
+  livefeed auth               Choose a provider and sign in
+  livefeed logout             Choose providers and remove saved logins
+  livefeed update             Install the latest Livefeed version
   livefeed --help             Show this help
   livefeed --version          Show the installed version`;
 
@@ -44,63 +48,133 @@ switch (command._tag) {
   case "version":
     console.log(VERSION);
     break;
-  case "auth": {
-    console.log(`Opening ${command.provider === "youtube" ? "Google" : "Twitch"} sign-in…`);
-    if (command.provider === "youtube") {
-      const result = await authenticate();
-      if (Result.isError(result)) printError(result.error);
-      else console.log(`Connected to ${result.value.channelTitle}.`);
+  case "update": {
+    console.log(`Checking for Livefeed updates. Installed version: ${VERSION}`);
+    const result = await updateLivefeed({ currentVersion: VERSION, mainPath: Bun.main });
+    if (Result.isError(result)) {
+      console.error(UpdateError.message(result.error));
+      process.exitCode = 1;
+    } else if (result.value._tag === "current") {
+      console.log(`Livefeed ${result.value.version} is already the latest version.`);
     } else {
-      const result = await authenticateTwitch();
-      if (Result.isError(result)) printError(result.error);
-      else console.log(`Connected to ${result.value.displayName}.`);
+      console.log(
+        `Updated Livefeed from ${result.value.fromVersion} to ${result.value.toVersion} using ${result.value.packageManager}.`,
+      );
     }
+    break;
+  }
+  case "auth": {
+    const provider = await selectAuthProvider();
+    if (provider) await authenticateProvider(provider);
     break;
   }
   case "logout": {
-    const result = command.provider === "youtube" ? await logout() : await logoutTwitch();
-    if (Result.isError(result)) printError(result.error);
-    else
-      console.log(
-        result.value ? "Signed out. The saved login was removed." : "Already signed out.",
-      );
+    const target = await selectLogoutTarget();
+    if (target) await logoutSelected(target);
     break;
   }
-  case "run": {
-    if (command.provider === "youtube") {
-      const credentials = await loadCredentials();
-      if (Result.isError(credentials)) {
-        printError(credentials.error);
-        break;
-      }
-      const token = await accessToken(credentials.value);
-      if (Result.isError(token)) {
-        printError(token.error);
-        break;
-      }
-      const feed: FeedClient = {
-        channelTitle: credentials.value.channelTitle,
-        refreshAccessToken: () => accessToken(credentials.value),
-        findActiveBroadcast,
-        loadChatHistory,
-        openChatStream,
-      };
-      await runTui(token.value, feed);
-    } else {
-      const credentials = await loadTwitchCredentials();
-      if (Result.isError(credentials)) {
-        printError(credentials.error);
-        break;
-      }
-      const token = await twitchAccessToken(credentials.value);
-      if (Result.isError(token)) {
-        printError(token.error);
-        break;
-      }
-      await runTui(token.value, twitchFeed(credentials.value));
+  case "run-auto": {
+    const [youtubeCredentials, twitchCredentials] = await Promise.all([
+      loadCredentials(),
+      loadTwitchCredentials(),
+    ]);
+
+    if (Result.isError(youtubeCredentials) && youtubeCredentials.error._tag !== "Unauthenticated") {
+      printError(youtubeCredentials.error);
+      break;
+    }
+    if (
+      Result.isError(twitchCredentials) &&
+      twitchCredentials.error._tag !== "TwitchUnauthenticated"
+    ) {
+      printError(twitchCredentials.error);
+      break;
+    }
+
+    const authenticated = new Set<Provider>();
+    if (Result.isOk(youtubeCredentials)) authenticated.add("youtube");
+    if (Result.isOk(twitchCredentials)) authenticated.add("twitch");
+    const automatic = automaticProvider(authenticated);
+
+    if (automatic._tag === "none") {
+      printError({ _tag: "NoAuthenticatedProvider" });
+      break;
+    }
+
+    const provider = automatic._tag === "selected" ? automatic.provider : await selectProvider();
+    if (!provider) break;
+
+    if (provider === "youtube" && Result.isOk(youtubeCredentials)) {
+      await runYouTube(youtubeCredentials.value);
+    } else if (provider === "twitch" && Result.isOk(twitchCredentials)) {
+      await runTwitch(twitchCredentials.value);
     }
     break;
   }
+}
+
+async function authenticateProvider(provider: Provider): Promise<void> {
+  if (provider === "youtube") {
+    console.log("Opening Google sign-in…");
+    const result = await authenticate();
+    if (Result.isError(result)) printError(result.error);
+    else console.log(`Connected to ${result.value.channelTitle}.`);
+    return;
+  }
+
+  console.log("Opening Twitch sign-in…");
+  const result = await authenticateTwitch();
+  if (Result.isError(result)) printError(result.error);
+  else console.log(`Connected to ${result.value.displayName}.`);
+}
+
+async function logoutSelected(target: LogoutTarget): Promise<void> {
+  if (target === "all") {
+    const [youtubeResult, twitchResult] = await Promise.all([logout(), logoutTwitch()]);
+    printLogoutResult("YouTube", youtubeResult);
+    printLogoutResult("Twitch", twitchResult);
+    return;
+  }
+
+  const result = target === "youtube" ? await logout() : await logoutTwitch();
+  printLogoutResult(target === "youtube" ? "YouTube" : "Twitch", result);
+}
+
+function printLogoutResult(label: string, result: Awaited<ReturnType<typeof logout>>): void {
+  if (Result.isError(result)) {
+    printError(result.error);
+    return;
+  }
+  console.log(
+    result.value
+      ? `Signed out of ${label}. The saved login was removed.`
+      : `${label} was already signed out.`,
+  );
+}
+
+async function runYouTube(credentials: Credentials): Promise<void> {
+  const token = await accessToken(credentials);
+  if (Result.isError(token)) {
+    printError(token.error);
+    return;
+  }
+  const feed: FeedClient = {
+    channelTitle: credentials.channelTitle,
+    refreshAccessToken: () => accessToken(credentials),
+    findActiveBroadcast,
+    loadChatHistory,
+    openChatStream,
+  };
+  await runTui(token.value, feed);
+}
+
+async function runTwitch(credentials: TwitchCredentials): Promise<void> {
+  const token = await twitchAccessToken(credentials);
+  if (Result.isError(token)) {
+    printError(token.error);
+    return;
+  }
+  await runTui(token.value, twitchFeed(credentials));
 }
 
 function twitchFeed(credentials: TwitchCredentials): FeedClient {

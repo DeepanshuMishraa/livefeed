@@ -1,6 +1,6 @@
 {
   "name": "livefeed",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "YouTube and Twitch live chat, native to your terminal.",
   "license": "MIT",
   "repository": {
@@ -27,6 +27,7 @@
   },
   "scripts": {
     "dev": "bun run --watch src/index.tsx",
+    "postinstall": "node bin/postinstall.cjs",
     "build": "bun run scripts/build.ts",
     "deploy": "bun run check && bun run build && npm publish --access public --tag latest",
     "release:patch": "npm version patch --no-git-tag-version && bun run deploy",

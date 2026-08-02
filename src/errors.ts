@@ -1,4 +1,5 @@
 export type LivefeedError =
+  | { readonly _tag: "NoAuthenticatedProvider" }
   | { readonly _tag: "Unauthenticated" }
   | { readonly _tag: "OAuthCallbackFailed"; readonly reason: string }
   | { readonly _tag: "AuthServerUnavailable"; readonly reason: string }
@@ -29,6 +30,8 @@ export type LivefeedError =
 export const LivefeedError = {
   message(error: LivefeedError): string {
     switch (error._tag) {
+      case "NoAuthenticatedProvider":
+        return "No saved login found. Run `livefeed auth`, connect a provider, then try `livefeed` again.";
       case "Unauthenticated":
         return "Not signed in. Run `livefeed auth`, then try again.";
       case "OAuthCallbackFailed":
@@ -62,11 +65,11 @@ export const LivefeedError = {
       case "InvalidGoogleResponse":
         return `YouTube returned an unexpected response during ${error.operation}. Update livefeed or report the issue.`;
       case "TwitchUnauthenticated":
-        return "Not signed in to Twitch. Run `livefeed twitch auth`, then try again.";
+        return "Not signed in to Twitch. Run `livefeed auth`, choose Twitch, then try again.";
       case "TwitchOAuthCallbackFailed":
-        return `Twitch sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed twitch auth\` to retry.`;
+        return `Twitch sign-in did not finish: ${error.reason}. No credentials were changed; run \`livefeed auth\` and choose Twitch to retry.`;
       case "TwitchTokenRejected":
-        return "Twitch rejected the saved login. Run `livefeed twitch auth` to reconnect your account.";
+        return "Twitch rejected the saved login. Run `livefeed auth` and choose Twitch to reconnect your account.";
       case "TwitchServiceFailure":
         return `Twitch returned ${error.status}: ${error.reason}. Existing messages are preserved; retry shortly.`;
       case "TwitchHistoryUnavailable":

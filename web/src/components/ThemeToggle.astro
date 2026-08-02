@@ -20,7 +20,7 @@
 			button.setAttribute("title", label);
 			document
 				.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-				?.setAttribute("content", theme === "dark" ? "#000000" : "#f4f3ee");
+				?.setAttribute("content", theme === "dark" ? "#11120f" : "#fafaf5");
 		};
 
 		applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
@@ -40,16 +40,18 @@
 <style>
 	button {
 		display: inline-flex;
-		width: 2.75rem;
-		height: 2.75rem;
+		width: 2.25rem;
+		height: 2.25rem;
 		align-items: center;
 		justify-content: center;
 		padding: 0;
-		border: 0;
+		border: 1px solid var(--line);
 		color: var(--ink-muted);
 		background: transparent;
 		cursor: pointer;
-		transition: color 140ms var(--ease-out);
+		transition:
+			color 140ms var(--ease-out),
+			border-color 140ms var(--ease-out);
 	}
 
 	svg {
@@ -76,7 +78,8 @@
 
 	@media (hover: hover) {
 		button:hover {
-			color: var(--ink);
+			border-color: var(--accent);
+			color: var(--accent);
 		}
 	}
 </style>

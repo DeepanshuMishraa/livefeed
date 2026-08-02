@@ -1,0 +1,147 @@
+{
+  "branding": {
+    "colorScheme": "light",
+    "fonts": [
+      {
+        "family": "JetBrains Mono",
+        "role": "monospace"
+      },
+      {
+        "family": "Source Serif 4",
+        "role": "body"
+      },
+      {
+        "family": "VT323",
+        "role": "monospace"
+      }
+    ],
+    "colors": {
+      "primary": "#818181",
+      "accent": "#3553FF",
+      "background": "#FAFAF5",
+      "textPrimary": "#818181",
+      "link": "#3553FF"
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "Source Serif 4",
+        "heading": "Source Serif 4"
+      },
+      "fontStacks": {
+        "heading": ["VT323", "ui-monospace", "JetBrains Mono", "monospace"],
+        "body": ["Source Serif 4", "Source Serif Pro", "Iowan Old Style", "Georgia", "serif"],
+        "paragraph": ["Source Serif 4", "Source Serif Pro", "Iowan Old Style", "Georgia", "serif"]
+      },
+      "fontSizes": {
+        "h1": "128px",
+        "h2": "28.8px",
+        "body": "20px"
+      }
+    },
+    "spacing": {
+      "baseUnit": 4,
+      "borderRadius": "0px"
+    },
+    "components": {
+      "buttonPrimary": {
+        "background": "#3553FF",
+        "textColor": "#FFFFFF",
+        "borderRadius": "0px",
+        "borderRadiusCorners": {
+          "topLeft": "0px",
+          "topRight": "0px",
+          "bottomRight": "0px",
+          "bottomLeft": "0px"
+        },
+        "shadow": "none"
+      },
+      "buttonSecondary": {
+        "background": "#FAFAF5",
+        "textColor": "#3553FF",
+        "borderColor": "#3553FF",
+        "borderRadius": "0px",
+        "borderRadiusCorners": {
+          "topLeft": "0px",
+          "topRight": "0px",
+          "bottomRight": "0px",
+          "bottomLeft": "0px"
+        },
+        "shadow": "none"
+      }
+    },
+    "images": {
+      "logo": null,
+      "favicon": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23fafaf5'/><rect x='2' y='2' width='28' height='28' fill='none' stroke='%233553ff' stroke-width='1.2'/><text x='6' y='22' font-size='14' font-family='monospace' fill='%233553ff'>AI</text></svg>",
+      "ogImage": "https://aiengineeringfromscratch.com/og-image.png?v=3"
+    },
+    "__llm_button_reasoning": {
+      "primary": {
+        "index": 1,
+        "text": "Skip to content",
+        "reasoning": "Button #1 has a vibrant blue background (#3553FF), which is typically used for primary CTAs. The color is distinct and stands out, making it the most likely candidate for the primary action."
+      },
+      "secondary": {
+        "index": 0,
+        "text": "Star on GitHub\n          45.4k",
+        "reasoning": "Button #0 has a different background color (#FAFAF5) and serves a secondary purpose ('Star on GitHub'), making it suitable as a secondary button."
+      },
+      "confidence": 0.95
+    },
+    "personality": {
+      "tone": "modern",
+      "energy": "medium",
+      "targetAudience": "developers and tech enthusiasts"
+    },
+    "designSystem": {
+      "framework": "custom",
+      "componentLibrary": ""
+    },
+    "confidence": {
+      "buttons": 0.95,
+      "colors": 0.9,
+      "overall": 0.925
+    },
+    "__llm_metadata": {
+      "logoSelection": {
+        "llmCalled": false,
+        "llmSucceeded": false,
+        "finalSource": "none"
+      },
+      "buttonClassification": {
+        "llmCalled": true,
+        "llmSucceeded": true
+      }
+    }
+  },
+  "metadata": {
+    "twitter:title": "AI Engineering from Scratch",
+    "twitter:description": "503 lessons. 20 phases. Write the backprop, the tokenizer, the attention mechanism, and the agent loop by hand.",
+    "description": "AI Engineering from Scratch is a free, open-source curriculum that builds every core AI algorithm by hand — 503 lessons, 20 phases, four languages. The math, the model, the tokenizer, and the agent loop. Once, by hand.",
+    "ogImage": "https://aiengineeringfromscratch.com/og-image.png?v=3",
+    "og:url": "https://aiengineeringfromscratch.com",
+    "ogTitle": "AI Engineering from Scratch",
+    "og:image": "https://aiengineeringfromscratch.com/og-image.png?v=3",
+    "twitter:image": "https://aiengineeringfromscratch.com/og-image.png?v=3",
+    "og:description": "503 lessons. 20 phases. Write the backprop, the tokenizer, the attention mechanism, and the agent loop by hand before any framework gets imported. Python, TypeScript, Rust, Julia.",
+    "language": "en",
+    "ogDescription": "503 lessons. 20 phases. Write the backprop, the tokenizer, the attention mechanism, and the agent loop by hand before any framework gets imported. Python, TypeScript, Rust, Julia.",
+    "viewport": "width=device-width, initial-scale=1.0",
+    "og:type": "website",
+    "title": "AI Engineering from Scratch",
+    "og:title": "AI Engineering from Scratch",
+    "twitter:card": "summary_large_image",
+    "ogUrl": "https://aiengineeringfromscratch.com",
+    "favicon": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23fafaf5'/><rect x='2' y='2' width='28' height='28' fill='none' stroke='%233553ff' stroke-width='1.2'/><text x='6' y='22' font-size='14' font-family='monospace' fill='%233553ff'>AI</text></svg>",
+    "scrapeId": "019fc103-7849-758f-b659-6b7dab3139fb",
+    "sourceURL": "https://aiengineeringfromscratch.com/",
+    "url": "https://aiengineeringfromscratch.com/",
+    "statusCode": 200,
+    "contentType": "text/html; charset=utf-8",
+    "timezone": "America/New_York",
+    "proxyUsed": "basic",
+    "indexId": "e15d6a86-4a0f-4170-a836-aaefbd643445",
+    "creditsUsed": 1,
+    "concurrencyLimited": false
+  },
+  "images": []
+}

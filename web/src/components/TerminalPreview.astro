@@ -1,12 +1,17 @@
 ---
 const messages = [
-  { author: "maya_dev", message: "audio is clean now", color: "cyan" },
-  { author: "northstar", message: "does this pick up unlisted streams?", color: "purple" },
-  { author: "dipxsy", message: "yes — visibility does not matter", color: "blue" },
-  { author: "buildwithsam", message: "the terminal view is much easier to follow", color: "green" },
-  { author: "nulladdict", message: "chat history loaded too?", color: "pink" },
+  { author: "bytebloom", message: "audio is clean now", color: "cyan" },
+  { author: "orbitalecho", message: "does this pick up unlisted streams?", color: "purple" },
+  { author: "dipxsy", message: "yes, visibility does not matter", color: "blue" },
+  { author: "pixelharbor", message: "the terminal view is much easier to follow", color: "green" },
+  { author: "sleepycompiler", message: "chat history loaded too?", color: "pink" },
   { author: "dipxsy", message: "yep, then it follows new messages", color: "blue" },
-  { author: "cosmastech", message: "this is staying open on the second monitor", color: "gold" },
+  { author: "limewireframe", message: "this is staying open on the second monitor", color: "gold" },
+  { author: "staticgarden", message: "love how quiet the interface feels", color: "cyan" },
+  { author: "softpacket", message: "does it reconnect on its own?", color: "purple" },
+  { author: "dipxsy", message: "automatically, messages stay right here", color: "blue" },
+  { author: "moonlitcache", message: "shipping this for tonight's stream", color: "green" },
+  { author: "tinydaemon", message: "exactly what my second monitor needed", color: "pink" },
 ] as const;
 ---
 
@@ -19,22 +24,63 @@ const messages = [
 
   <div class="messages">
     {
-      messages.map((message, index) => (
-        <p class="message" style={`--row: ${index}`}>
-          <strong class={message.color}>{message.author}</strong>
-          <span class="separator">: </span>
-          {message.message}
-        </p>
+      messages.map((message) => (
+        <div class="message-slot" data-chat-message>
+          <p class="message">
+            <strong class={message.color}>{message.author}</strong>
+            <span class="separator">: </span>
+            {message.message}
+          </p>
+        </div>
       ))
     }
   </div>
 </figure>
 
+<script>
+  const delay = (milliseconds: number) =>
+    new Promise<void>((resolve) => window.setTimeout(resolve, milliseconds));
+
+  for (const terminal of document.querySelectorAll<HTMLElement>(".terminal")) {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const messages = [...terminal.querySelectorAll<HTMLElement>("[data-chat-message]")];
+
+    if (prefersReducedMotion.matches || messages.length === 0) continue;
+
+    terminal.dataset.animated = "true";
+
+    const play = async () => {
+      while (terminal.isConnected && !prefersReducedMotion.matches) {
+        for (const message of messages) {
+          message.dataset.visible = "true";
+          await delay(560);
+        }
+
+        await delay(1800);
+        terminal.dataset.resetting = "true";
+
+        for (const message of messages) {
+          delete message.dataset.visible;
+        }
+
+        await delay(160);
+        delete terminal.dataset.resetting;
+      }
+
+      for (const message of messages) {
+        message.dataset.visible = "true";
+      }
+    };
+
+    void play();
+  }
+</script>
+
 <style>
   .terminal {
     --cli-primary: #d9dbea;
     --cli-muted: #777f96;
-    --cli-connected: #78c7a3;
+    --cli-connected: #7187ff;
     --author-cyan: #79c7c5;
     --author-purple: #c9a7eb;
     --author-blue: #8fb8e8;
@@ -42,7 +88,8 @@ const messages = [
     --author-pink: #e3a6b8;
     --author-gold: #d6b86a;
     display: flex;
-    min-height: clamp(24rem, min(32vw, 55vh), 30rem);
+    min-height: clamp(22rem, min(32vw, 55vh), 30rem);
+    height: 100%;
     flex-direction: column;
     margin: 0;
     padding: clamp(1rem, 2vw, 1.5rem);
@@ -57,7 +104,7 @@ const messages = [
   :global(html[data-theme="light"]) .terminal {
     --cli-primary: #242424;
     --cli-muted: #656565;
-    --cli-connected: #247653;
+    --cli-connected: #3553ff;
     --author-cyan: #006b68;
     --author-purple: #6f42a6;
     --author-blue: #265f9e;
@@ -77,13 +124,49 @@ const messages = [
     flex-direction: column;
     justify-content: flex-end;
     padding-top: 3rem;
+    overflow: hidden;
+  }
+
+  .message-slot {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .message-slot > .message {
+    min-height: 0;
+    overflow: hidden;
   }
 
   .message {
     margin: 0;
     color: var(--cli-primary);
-    animation: row-in 420ms var(--ease-out) both;
-    animation-delay: calc(120ms + var(--row) * 70ms);
+  }
+
+  .terminal[data-animated] .message-slot {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 420ms var(--ease-out);
+  }
+
+  .terminal[data-animated] .message-slot .message {
+    opacity: 0;
+    transform: translateY(0.45rem);
+    transition:
+      opacity 420ms var(--ease-out),
+      transform 420ms var(--ease-out);
+  }
+
+  .terminal[data-animated] .message-slot[data-visible] {
+    grid-template-rows: 1fr;
+  }
+
+  .terminal[data-animated] .message-slot[data-visible] .message {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .terminal[data-resetting] .message-slot,
+  .terminal[data-resetting] .message-slot .message {
+    transition-duration: 0ms;
   }
 
   .message strong {
@@ -116,13 +199,6 @@ const messages = [
 
   .gold {
     color: var(--author-gold);
-  }
-
-  @keyframes row-in {
-    from {
-      opacity: 0;
-      transform: translateY(0.45rem);
-    }
   }
 
   @media (max-width: 64rem) {
