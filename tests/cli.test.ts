@@ -6,6 +6,7 @@ describe("parseCommand", () => {
     [[], { _tag: "run-auto" }],
     [["auth"], { _tag: "auth" }],
     [["logout"], { _tag: "logout" }],
+    [["--demo"], { _tag: "demo" }],
     [["--version"], { _tag: "version" }],
     [["-v"], { _tag: "version" }],
     [["update"], { _tag: "update" }],

@@ -2,6 +2,7 @@ export type Provider = "youtube" | "twitch" | "kick";
 
 export type Command =
   | { readonly _tag: "run-auto" }
+  | { readonly _tag: "demo" }
   | { readonly _tag: "auth" }
   | { readonly _tag: "logout" }
   | { readonly _tag: "help" }
@@ -11,6 +12,7 @@ export type Command =
 export function parseCommand(args: readonly string[]): Command {
   const first = args[0];
   if (!first) return { _tag: "run-auto" };
+  if (first === "--demo" && args.length === 1) return { _tag: "demo" };
   if (first === "--version" || first === "-v") return { _tag: "version" };
   if (first === "--help" || first === "-h" || first === "help") return { _tag: "help" };
   if (first === "update" && args.length === 1) return { _tag: "update" };

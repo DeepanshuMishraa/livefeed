@@ -28,6 +28,7 @@ bunx livefeed
 ```sh
 livefeed auth
 livefeed
+livefeed --demo
 livefeed logout
 ```
 
@@ -36,6 +37,10 @@ are connected, it shows a compact selector. `livefeed auth` asks which provider 
 `livefeed logout` lets you remove one login or all saved logins.
 
 Authentication opens in your browser. No stream key, pasted token, or client secret is required.
+
+For a presentation-ready preview, run `livefeed --demo`, choose any provider, and synthetic chat
+messages will arrive every three to four seconds. Demo mode does not read saved logins or make
+provider network requests. Press `q` to quit as usual.
 
 You can start `livefeed` before going live. It stays open, reports that the stream is offline, and
 connects automatically within about ten seconds of the broadcast starting. When joining an active
@@ -49,6 +54,7 @@ or 24 hours.
 | Command | Action |
 | --- | --- |
 | `livefeed` | Open the only connected provider or choose among connected providers |
+| `livefeed --demo` | Choose a provider and preview synthetic chat without signing in |
 | `livefeed auth` | Choose YouTube, Twitch, or Kick and sign in |
 | `livefeed logout` | Remove one provider login or all saved logins |
 | `livefeed update` | Check for and install the latest published version |

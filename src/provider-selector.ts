@@ -41,6 +41,17 @@ export function selectProvider(): Promise<Provider | null> {
   });
 }
 
+export function selectDemoProvider(): Promise<Provider | null> {
+  return selectChoice({
+    prompt: "Select a provider to demo",
+    action: "open",
+    unavailable:
+      "Choosing a demo provider requires an interactive terminal. Run `livefeed --demo` from a terminal and try again.",
+    choices: providerChoices,
+    confirmation: (label) => `✓ Opening ${label} demo`,
+  });
+}
+
 export function selectAuthProvider(): Promise<Provider | null> {
   return selectChoice({
     prompt: "Select a provider to connect",

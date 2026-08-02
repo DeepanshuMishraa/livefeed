@@ -3,6 +3,7 @@ import { Result } from "better-result";
 import packageJson from "../package.json" with { type: "json" };
 import { accessToken, authenticate, type Credentials, loadCredentials, logout } from "./auth";
 import { automaticProvider, type Provider, parseCommand } from "./cli";
+import { demoFeed } from "./demo";
 import { LivefeedError, type LivefeedError as LivefeedErrorType } from "./errors";
 import type { FeedClient } from "./feed";
 import {
@@ -16,6 +17,7 @@ import { findActiveKickBroadcast, loadKickChatHistory, openKickChatStream } from
 import {
   type LogoutTarget,
   selectAuthProvider,
+  selectDemoProvider,
   selectLogoutTarget,
   selectProvider,
 } from "./provider-selector";
@@ -36,6 +38,7 @@ const HELP = `livefeed — YouTube, Twitch, and Kick live chat, in the terminal
 
 Usage:
   livefeed                    Open the connected chat or choose a provider
+  livefeed --demo             Preview synthetic chat without signing in
   livefeed auth               Choose a provider and sign in
   livefeed logout             Choose providers and remove saved logins
   livefeed update             Install the latest Livefeed version
@@ -56,6 +59,11 @@ switch (command._tag) {
   case "version":
     console.log(VERSION);
     break;
+  case "demo": {
+    const provider = await selectDemoProvider();
+    if (provider) await runTui("demo", demoFeed(provider));
+    break;
+  }
   case "update": {
     console.log(`Checking for Livefeed updates. Installed version: ${VERSION}`);
     const result = await updateLivefeed({ currentVersion: VERSION, mainPath: Bun.main });
